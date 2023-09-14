@@ -70,8 +70,14 @@ function Main()
   {
     async function cookieCheck()
     {
-      const hasCookie = await checkForCookie();
-      dispatch({ type: hasCookie ? "login" : "logout" });
+      try
+      {
+        const hasCookie = await checkForCookie();
+        dispatch({ type: hasCookie ? "login" : "logout" });
+      } catch (error)
+      {
+        dispatch({ type: "flashMessage", value: "Error connecting to backend." });
+      }
     }
     cookieCheck();
   }, []);

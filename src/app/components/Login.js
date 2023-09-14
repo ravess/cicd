@@ -26,7 +26,7 @@ function Login()
       {
         try
         {
-          const response = await Axios.post("/login", { username: data.username, password: data.password }, { withCredentials: true });
+          const response = await Axios.post("/login2", { username: data.username, password: data.password }, { withCredentials: true });
           console.log(response);
           appDispatch({ type: "login" });
           appDispatch({ type: "flashMessage", value: "You have successfully logged in." });
