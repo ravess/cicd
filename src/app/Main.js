@@ -69,7 +69,7 @@ function Main()
   {
     if (state.loggedIn == false)
     {
-      Axios.get("/logout", { withCredentials: true });
+      Axios.get("/logout2", { withCredentials: true });
     }
   }, [state.loggedIn]);
 

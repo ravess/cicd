@@ -1,11 +1,11 @@
+import Axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import LoadingDotsIcon from "./LoadingDotsIcon";
+import { Link, useNavigate } from "react-router-dom";
 import DispatchContext from "../DispatchContext";
 import StateContext from "../StateContext";
-import { checkForCookie } from "./Permissions";
-import Axios from "axios";
+import LoadingDotsIcon from "./LoadingDotsIcon";
 import Page from "./Page";
+import { checkForCookie } from "./Permissions";
 
 function ManageUsers()
 {
@@ -35,9 +35,10 @@ function ManageUsers()
     {
       const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
+      console.log(response.data.data);
     } catch (e) 
     {
-      //appDispatch({ type: "flashMessage", value: "Error getting groups." });
+      appDispatch({ type: "flashMessage", value: "Error getting groups." });
     }
   }
 
@@ -45,7 +46,8 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/createGroup", { newgroup: newgroup }, { withCredentials: true });
+      const response = await Axios.post("/createGroup", { groupName: newgroup }, { withCredentials: true });
+      appDispatch({ type: "flashMessage", value: "Group created." });
     } catch (e) 
     {
       appDispatch({ type: "flashMessage", value: "Group creation failed." });
@@ -56,7 +58,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/users", { role: "\\.Admin\\." }, { withCredentials: true });
+      const response = await Axios.get("/users", { withCredentials: true });
       setUserData(response.data.data);
     } catch (e) 
     {
@@ -90,7 +92,7 @@ function ManageUsers()
     getGroups();
   }, [appState.dbChange]);
 
-  function newGroupSubmit(e) 
+  async function newGroupSubmit(e) 
   {
     e.preventDefault();
     const newInput = e.target.elements.newGroup.value;
@@ -106,7 +108,7 @@ function ManageUsers()
     }
     else
     {
-      addGroup(newInput);
+      await addGroup(newInput);
       getGroups();
       e.target.reset();
     }
@@ -146,8 +148,8 @@ function ManageUsers()
                 <tr key={user.username}>
                   <td>{user.username}</td>
                   <td>{user.email}</td>
-                  <td>{user.isActive ? "Active" : "Inactive"}</td>
-                  <td>{user.userGroup}</td>
+                  <td>{user.isActive === 1 ? "Active" : "Inactive"}</td>
+                  <td>{user.groups}</td>
                   <td>
                     <Link to={`/user/${user.username}`}>Edit</Link>
                   </td>
