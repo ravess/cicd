@@ -1,11 +1,15 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import Page from "./Page";
 import Axios from "axios";
 import DispatchContext from "../DispatchContext";
+import StateContext from "../StateContext";
+import LoadingDotsIcon from "./LoadingDotsIcon";
+import { checkForCookie } from "./Permissions";
 
 function Login()
 {
   const appDispatch = useContext(DispatchContext);
+  const appState = useContext(StateContext);
 
   //Login button event handler
   async function handleSubmit(e)
@@ -26,10 +30,11 @@ function Login()
       {
         try
         {
-          const response = await Axios.post("/login2", { username: data.username, password: data.password }, { withCredentials: true });
+          const response = await Axios.post("/login", { username: data.username, password: data.password }, { withCredentials: true });
           console.log(response);
           appDispatch({ type: "login" });
           appDispatch({ type: "flashMessage", value: "You have successfully logged in." });
+          appDispatch({ type: "showLoading", value: true });
         } catch (e)
         {
           if (e.response.status === 403)
@@ -44,6 +49,11 @@ function Login()
       }
       fetchResults();
     }
+  }
+
+  if (appState.isLoading)
+  {
+    return <LoadingDotsIcon />;
   }
 
   return (

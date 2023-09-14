@@ -21,6 +21,7 @@ import ManageUsers from "./components/ManageUsers";
 import ModifyProfile from "./components/ModifyProfile";
 import CreateUser from "./components/CreateUser";
 import Board from "./components/Board";
+import LoadingDotsIcon from "./components/LoadingDotsIcon";
 
 function Main()
 {
@@ -28,8 +29,10 @@ function Main()
     loggedIn: null,
     flashMessages: [],
     dbChange: 0,
-    isAdmin: false
+    isAdmin: false,
+    isLoading: true
   };
+
 
   function ourReducer(draft, action)
   {
@@ -53,6 +56,10 @@ function Main()
       case "removeAdmin":
         draft.isAdmin = false;
         return;
+      case "showLoading":
+        draft.isLoading = action.value;
+        return;
+
     }
   }
 
@@ -78,8 +85,13 @@ function Main()
       {
         dispatch({ type: "flashMessage", value: "Error connecting to backend." });
       }
+      finally
+      {
+        dispatch({ type: "showLoading", value: false });
+      }
     }
     cookieCheck();
+
   }, []);
 
   return (

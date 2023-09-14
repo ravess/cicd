@@ -51,7 +51,7 @@ function ModifyUser()
   {
     try
     {
-      const response = await Axios.post("/getGroups", {}, { withCredentials: true });
+      const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e)
     {
@@ -87,7 +87,7 @@ function ModifyUser()
               email: data.email ? data.email : "",
               userGroup: allGroups ? allGroups : "",
               isActive: data.isActive ? 1 : 0,
-              role: "admin",
+              role: "\\.Admin\\.",
               targetId: id
             },
             { withCredentials: true }

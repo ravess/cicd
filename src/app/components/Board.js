@@ -120,7 +120,7 @@ function Board()
     {
         try
         {
-            const response = await Axios.post("/getGroups", {}, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.get("/getGroups", { headers: { Authorization: `Bearer ${appState.user.token}` } });
             setGroupData(response.data.data);
         } catch (e)
         {

@@ -23,7 +23,7 @@ function CreateUser()
       const response = await Axios.post(
         "/checkGroup",
         { role: "\\.Admin\\." },
-        { headers: { Authorization: `Bearer ${appState.user.token}` } }
+        { withCredentials: true }
       );
       setIsLoading(false);
     } catch (e)
@@ -37,7 +37,7 @@ function CreateUser()
   {
     try
     {
-      const response = await Axios.post("/getGroups", {}, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+      const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e)
     {
@@ -89,7 +89,7 @@ function CreateUser()
               email: data.email ? data.email : "",
               userGroup: allGroups ? allGroups : "",
               isActive: data.isActive ? 1 : 0,
-              role: "admin"
+              role: "\\.Admin\\."
             },
             { headers: { Authorization: `Bearer ${appState.user.token}` } }
           );
@@ -97,7 +97,7 @@ function CreateUser()
           return true;
         } catch (e)
         {
-          appDispatch({ type: "flashMessage", value: "Error updating user info." });
+          appDispatch({ type: "flashMessage", value: "Error creating user." });
           return false;
         }
       }

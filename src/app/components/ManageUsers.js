@@ -20,7 +20,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/checkGroup", { role: "admin" }, { withCredentials: true });
+      const response = await Axios.post("/checkGroup", { role: "\\.Admin\\." }, { withCredentials: true });
       setIsLoading(false);
     } catch (e) 
     {
@@ -33,7 +33,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/getGroups", {}, { withCredentials: true });
+      const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e) 
     {
@@ -56,7 +56,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/users", { role: "admin" }, { withCredentials: true });
+      const response = await Axios.post("/users", { role: "\\.Admin\\." }, { withCredentials: true });
       setUserData(response.data.data);
     } catch (e) 
     {

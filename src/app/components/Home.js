@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import StateContext from "../StateContext";
 import DispatchContext from "../DispatchContext";
+import LoadingDotsIcon from "./LoadingDotsIcon";
 import Axios from "axios";
 import Page from "./Page";
 
@@ -11,7 +11,6 @@ function Home()
   const appState = useContext(StateContext);
   const appDispatch = useContext(DispatchContext);
   const [userData, setUserData] = useState([]);
-  const navigate = useNavigate();
 
   //Run once on first mount
   useEffect(() => 
@@ -29,7 +28,13 @@ function Home()
       }
     }
     getUser();
+    appDispatch({ type: "showLoading", value: false });
   }, []);
+
+  if (appState.isLoading)
+  {
+    return <LoadingDotsIcon />;
+  }
 
   return (
     <Page title="Home Page">
