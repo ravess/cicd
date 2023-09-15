@@ -35,6 +35,7 @@ function ManageUsers()
     {
       const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
+      console.log("GetGroups success! Response size: " + response.data.data.length);
       console.log(response.data.data);
     } catch (e) 
     {
@@ -60,8 +61,11 @@ function ManageUsers()
     {
       const response = await Axios.get("/users", { withCredentials: true });
       setUserData(response.data.data);
+      console.log("GetUsers success! Response size : " + response.data.data.length);
+      console.log(response.data.data);
     } catch (e) 
     {
+      console.log(e);
       appDispatch({ type: "flashMessage", value: "Error getting users." });
     }
   }
@@ -145,15 +149,17 @@ function ManageUsers()
             </thead>
             <tbody>
               {userData.map(user => (
-                <tr key={user.username}>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.isActive === 1 ? "Active" : "Inactive"}</td>
-                  <td>{user.groups}</td>
-                  <td>
-                    <Link to={`/user/${user.username}`}>Edit</Link>
-                  </td>
-                </tr>
+                user.username && (
+                  <tr key={user.username}>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>{user.isActive === 1 ? "Active" : "Inactive"}</td>
+                    <td>{user.groups}</td>
+                    <td>
+                      <Link to={`/user/${user.username}`}>Edit</Link>
+                    </td>
+                  </tr>
+                )
               ))}
             </tbody>
           </table>

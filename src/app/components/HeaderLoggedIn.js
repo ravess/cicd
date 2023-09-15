@@ -49,7 +49,7 @@ function HeaderLoggedIn(props)
   {
     try
     {
-      const response = await Axios.get("/logout", { withCredentials: true });
+      await Axios.post("/logout", { withCredentials: true });
     } catch (e)
     {
       console.log("LOGOUT ERROR");

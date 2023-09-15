@@ -26,7 +26,7 @@ import LoadingDotsIcon from "./components/LoadingDotsIcon";
 function Main()
 {
   const initialState = {
-    loggedIn: null,
+    loggedIn: false,
     flashMessages: [],
     dbChange: 0,
     isAdmin: false,
@@ -69,7 +69,7 @@ function Main()
   {
     if (state.loggedIn == false)
     {
-      Axios.get("/logout2", { withCredentials: true });
+      Axios.post("/logout", { withCredentials: true });
     }
   }, [state.loggedIn]);
 
@@ -80,9 +80,11 @@ function Main()
       try
       {
         const hasCookie = await checkForCookie();
+        console.log("Has Cookie = " + hasCookie);
         dispatch({ type: hasCookie ? "login" : "logout" });
       } catch (error)
       {
+        console.log(error);
         dispatch({ type: "flashMessage", value: "Error connecting to backend." });
       }
       finally
