@@ -15,6 +15,7 @@ function CreateUser()
 
   const [isLoading, setIsLoading] = useState(true);
   const [groupData, setGroupData] = useState([]);
+  const [chosenGroupData, setChosenGroupData] = useState([]);
 
   async function isAdmin()
   {
@@ -22,7 +23,7 @@ function CreateUser()
     {
       const response = await Axios.post(
         "/checkGroup",
-        { role: "\\.Admin\\." },
+        { group: "Admin" },
         { withCredentials: true }
       );
       setIsLoading(false);
@@ -45,37 +46,31 @@ function CreateUser()
     }
   }
 
-  useEffect(() =>
-  {
-    if (checkForCookie() == true)
-    {
-      appDispatch({ type: "logout" });
-      appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
-      navigate("/");
-    }
-    isAdmin();
-    getGroups();
-  }, []);
-
   async function handleSubmit(e)
   {
     e.preventDefault();
-    //Get form data
+    //Gets form data
     const formData = new FormData(e.target);
     const data = {};
     for (let [key, value] of formData.entries()) { data[key] = value; }
 
     //Parse the data for database insertion.
-    const allGroupsArray = formData.getAll("group");
-    const allGroups = "." + allGroupsArray.join(".") + ".";
+    const chosenGroupArray = chosenGroupData.map((item) => item.groupName);
+    chosenGroupArray.sort((a, b) => a.localeCompare(b));
+    const allGroups = "." + chosenGroupArray.join(".") + ".";
 
     if (!data.username || !data.password)
     {
       appDispatch({ type: "flashMessage", value: "Please enter a username and password." });
-    } else if (data.password && !data.password.match(`^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$`))
+    } else if (data.password && !data.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/))
     {
       appDispatch({ type: "flashMessage", value: "Your password does not match the requirements." });
-    } else
+    }
+    else if (data.email && !data.email.match(/[\w.-]+@[\w.-]+\.[A-Za-z]{2,4}/))
+    {
+      appDispatch({ type: "flashMessage", value: "Your email does not match the requirements." });
+    }
+    else
     {
       async function createProfile()
       {
@@ -87,23 +82,26 @@ function CreateUser()
               username: data.username ? data.username : "",
               password: data.password ? data.password : "",
               email: data.email ? data.email : "",
-              userGroup: allGroups ? allGroups : "",
-              isActive: data.isActive ? 1 : 0,
-              role: "\\.Admin\\."
+              groups: allGroups ? allGroups : "",
+              isActive: data.isActive ? 1 : 0
             },
-            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+            { withCredentials: true }
           );
-          appDispatch({ type: "flashMessage", value: "User Info successfully changed!" });
+          appDispatch({ type: "flashMessage", value: "User successfully created!" });
           return true;
         } catch (e)
         {
+          console.log(e);
           appDispatch({ type: "flashMessage", value: "Error creating user." });
           return false;
         }
       }
-      if (await createProfile())
+
+      if (await createProfile() === true)
       {
-        navigate("/users");
+        e.target.reset()
+        getGroups();
+        setChosenGroupData([]);
         appDispatch({ type: "dbChange" });
       } else
       {
@@ -111,6 +109,78 @@ function CreateUser()
       }
     }
   }
+
+  function handleAddGroup(e)
+  {
+    //Selects all the selected options in the available_group
+    const selectElement = document.querySelector('select[name="available_group"]');
+    let selectedValues = null;
+
+    if (selectElement)
+    {
+      const selectedOptions = Array.from(selectElement.selectedOptions);
+      selectedValues = selectedOptions.map((option) => option.value);
+    }
+
+    // Remove selected values from groupData and add to chosenGroupData (current groups)
+    setGroupData((prevGroupData) =>
+      prevGroupData.filter((value) => !selectedValues.includes(value.groupName))
+    );
+    setChosenGroupData((prevChosenGroupData) =>
+    {
+      const newChosenGroupData = selectedValues.map((value) => ({ groupName: value }));
+      return [
+        ...prevChosenGroupData,
+        ...newChosenGroupData.filter((newItem) =>
+          !prevChosenGroupData.some((prevItem) => prevItem.groupName === newItem.groupName)
+        ),
+      ];
+    });
+
+    selectElement.selectedIndex = -1;
+  }
+
+  function handleRemoveGroup(e)
+  {
+    const selectElement = document.querySelector('select[name="chosen_group"]');
+    let selectedValues = null;
+
+    // Check if the <select> element with the specified name exists
+    if (selectElement)
+    {
+      const selectedOptions = Array.from(selectElement.selectedOptions);
+      selectedValues = selectedOptions.map((option) => option.value);
+    }
+
+    // Remove selected values from groupData and add to chosenGroupData
+    setChosenGroupData((prevGroupData) =>
+      prevGroupData.filter((value) => !selectedValues.includes(value.groupName))
+    );
+    setGroupData((prevChosenGroupData) =>
+    {
+      const newChosenGroupData = selectedValues.map((value) => ({ groupName: value }));
+      return [
+        ...prevChosenGroupData,
+        ...newChosenGroupData.filter((newItem) =>
+          !prevChosenGroupData.some((prevItem) => prevItem.groupName === newItem.groupName)
+        ),
+      ];
+    });
+
+    selectElement.selectedIndex = -1;
+  }
+
+  useEffect(() =>
+  {
+    if (checkForCookie() == true)
+    {
+      appDispatch({ type: "logout" });
+      appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
+      navigate("/");
+    }
+    isAdmin();
+    getGroups();
+  }, []);
 
   if (isLoading)
   {
@@ -145,17 +215,38 @@ function CreateUser()
           </div>
 
           <div className="form-group">
-            <label htmlFor="group-modify" className="mb-1">
-              <small>Group</small>
-            </label>
-            <select multiple name="group" className="form-control">
-              {groupData.map((group, index) => (
-                <option key={index} value={group.groupName}>
-                  {group.groupName}
-                </option>
-              ))}
-            </select>
+            <div className="d-flex align-items-start">
+              <div className="mr-3">
+                <label htmlFor="group-modify" className="mb-1">
+                  <small>Available Groups</small>
+                </label>
+                <select multiple name="available_group" className="form-control" style={{ width: '25vw' }}>
+                  {groupData.map((group, index) => (
+                    <option key={index} value={group.groupName}>
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="d-flex flex-column justify-content-between mt-4">
+                <button type="button" className="mb-4" onClick={handleAddGroup}> &gt;&gt; </button>
+                <button type="button" onClick={handleRemoveGroup}> &lt;&lt; </button>
+              </div>
+              <div className="mx-3">
+                <label htmlFor="group-modify" className="mb-1">
+                  <small>Current Groups</small>
+                </label>
+                <select multiple name="chosen_group" className="form-control" style={{ width: '25vw' }}>
+                  {chosenGroupData.map((group, index) => (
+                    <option key={index} value={group.groupName}>
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
+
 
           <div className="form-group mt-3">
             <div className="form-check">

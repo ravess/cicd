@@ -226,7 +226,7 @@ function Board()
     {
         try
         {
-            const response = await Axios.post("/checkGroup", { role: role }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.post("/checkGroup", { group: role }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
             if (response.data.ingroup === false)
             {
                 appDispatch({ type: "flashMessage", value: "You do not have permission to access this resource." });
@@ -722,7 +722,7 @@ function Board()
                                 app_permit_doing: data.permit_doing,
                                 app_permit_done: data.permit_done,
                                 app_permit_create: data.permit_create,
-                                role: "\\.Project Lead\\."
+                                groups: "\\.Project Lead\\."
                             },
                             { headers: { Authorization: `Bearer ${appState.user.token}` } }
                         );
@@ -908,7 +908,7 @@ function Board()
                                 app_permit_doing: data.permit_doing,
                                 app_permit_done: data.permit_done,
                                 app_permit_create: data.permit_create,
-                                role: "\\.Project Lead\\."
+                                groups: "\\.Project Lead\\."
                             },
                             { headers: { Authorization: `Bearer ${appState.user.token}` } }
                         );
@@ -1088,7 +1088,7 @@ function Board()
                                 plan_start_date: data.plan_start_date,
                                 plan_end_date: data.plan_end_date,
                                 plan_colour: data.plan_colour,
-                                role: "\\.Project Manager\\."
+                                groups: "\\.Project Manager\\."
                             },
                             { headers: { Authorization: `Bearer ${appState.user.token}` } }
                         );
@@ -1189,7 +1189,7 @@ function Board()
                                 plan_mvp_name: selectedPlan.plan_mvp_name,
                                 plan_start_date: data.plan_start_date,
                                 plan_end_date: data.plan_end_date,
-                                role: "\\.Project Manager\\."
+                                groups: "\\.Project Manager\\."
                             },
                             { headers: { Authorization: `Bearer ${appState.user.token}` } }
                         );

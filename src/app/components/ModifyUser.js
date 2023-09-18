@@ -10,20 +10,21 @@ import { checkForCookie } from "./Permissions";
 function ModifyUser()
 {
   const { id } = useParams();
-  const appState = useContext(StateContext);
   const appDispatch = useContext(DispatchContext);
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState([]);
   const [groupData, setGroupData] = useState([]);
+  const [existingGroupdata, setExistingGroupData] = useState([]);
+  const [availableGroupData, setAvailableGroupData] = useState([]);
 
   async function isAdmin()
   {
     try
     {
       const response = await Axios.post("/checkGroup",
-        { role: "\\.Admin\\." },
+        { group: "Admin" },
         { withCredentials: true }
       );
       setIsLoading(false);
@@ -38,12 +39,20 @@ function ModifyUser()
   {
     try
     {
-      const response = await Axios.post("/getUser", { id: id }, { withCredentials: true });
+      const response = await Axios.get(`/users/${id}`, { withCredentials: true });
       setUserData(response.data);
+
+      const existingGroups = response.data.groups
+        .split('.')
+        .filter(Boolean)
+        .map((value) => ({ groupName: value }));
+
+      setExistingGroupData(existingGroups);
     } catch (e)
     {
+      console.log(e);
       console.log("Get user is failing");
-      appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
+      appDispatch({ type: "flashMessage", value: "Get User failed." });
     }
   }
 
@@ -68,8 +77,9 @@ function ModifyUser()
     for (let [key, value] of formData.entries()) { data[key] = value; }
 
     //Parse the data for database insertion.
-    const allGroupsArray = formData.getAll("group");
-    const allGroups = "." + allGroupsArray.join(".") + ".";
+    const chosenGroupArray = existingGroupdata.map((item) => item.groupName);
+    chosenGroupArray.sort((a, b) => a.localeCompare(b));
+    const allGroups = "." + chosenGroupArray.join(".") + ".";
 
     if (data.password && !data.password.match(`^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$`))
     {
@@ -80,15 +90,13 @@ function ModifyUser()
       {
         try
         {
-          const response = await Axios.post(
-            "/updateUser",
+          const response = await Axios.put(
+            `/users/${id}`,
             {
               password: data.password ? data.password : "",
               email: data.email ? data.email : "",
-              userGroup: allGroups ? allGroups : "",
-              isActive: data.isActive ? 1 : 0,
-              role: "\\.Admin\\.",
-              targetId: id
+              groups: allGroups ? allGroups : "",
+              isActive: data.isActive ? 1 : 0
             },
             { withCredentials: true }
           );
@@ -112,6 +120,67 @@ function ModifyUser()
     }
   }
 
+  function handleAddGroup(e)
+  {
+    const selectElement = document.querySelector('select[name="available_group"]');
+    let selectedValues = null;
+
+    // Check if the <select> element with the specified name exists
+    if (selectElement)
+    {
+      const selectedOptions = Array.from(selectElement.selectedOptions);
+      selectedValues = selectedOptions.map((option) => option.value);
+    }
+
+    // Remove selected values from currentGroupData and add to availableGroupData
+    setAvailableGroupData((prevGroupData) =>
+      prevGroupData.filter((value) => !selectedValues.includes(value.groupName))
+    );
+    setExistingGroupData((prevChosenGroupData) =>
+    {
+      const newChosenGroupData = selectedValues.map((value) => ({ groupName: value }));
+      return [
+        ...prevChosenGroupData,
+        ...newChosenGroupData.filter((newItem) =>
+          !prevChosenGroupData.some((prevItem) => prevItem.groupName === newItem.groupName)
+        ),
+      ];
+    });
+
+    selectElement.selectedIndex = -1;
+  }
+
+  function handleRemoveGroup(e)
+  {
+    const selectElement = document.querySelector('select[name="current_group"]');
+    let selectedValues = null;
+
+    // Check if the <select> element with the specified name exists
+    if (selectElement)
+    {
+      const selectedOptions = Array.from(selectElement.selectedOptions);
+      selectedValues = selectedOptions.map((option) => option.value);
+    }
+
+    // Remove selected values from groupData and add to availableGroupData
+    setExistingGroupData((prevGroupData) =>
+      prevGroupData.filter((value) => !selectedValues.includes(value.groupName))
+    );
+    setAvailableGroupData((prevChosenGroupData) =>
+    {
+      const newChosenGroupData = selectedValues.map((value) => ({ groupName: value }));
+      return [
+        ...prevChosenGroupData,
+        ...newChosenGroupData.filter((newItem) =>
+          !prevChosenGroupData.some((prevItem) => prevItem.groupName === newItem.groupName)
+        ),
+      ];
+    });
+
+    selectElement.selectedIndex = -1;
+  }
+
+
   useEffect(() =>
   {
     async function cookieCheck()
@@ -130,6 +199,15 @@ function ModifyUser()
     getGroups();
   }, []);
 
+
+  useEffect(() =>
+  {
+    const filteredGroups = groupData.filter((group1) =>
+      !existingGroupdata.some((group2) => group1.groupName === group2.groupName)
+    );
+    setAvailableGroupData(filteredGroups);
+  }, [groupData]);
+
   if (isLoading)
   {
     return <LoadingDotsIcon />;
@@ -137,7 +215,7 @@ function ModifyUser()
 
   return (
     <Page title="Modify User Detail" wide={true}>
-      {userData.userGroup && groupData && (
+      {userData.groups && groupData && (
         <form onSubmit={handleSubmit}>
           <h1 className="">Edit User Details</h1>
 
@@ -163,16 +241,36 @@ function ModifyUser()
           </div>
 
           <div className="form-group">
-            <label htmlFor="group-modify" className="mb-1">
-              <small>Group (Current: {userData.userGroup} )</small>
-            </label>
-            <select multiple name="group" className="form-control">
-              {groupData.map((group, index) => (
-                <option key={index} value={group.groupName}>
-                  {group.groupName}
-                </option>
-              ))}
-            </select>
+            <div className="d-flex align-items-start">
+              <div className="mr-3">
+                <label htmlFor="group-modify" className="mb-1">
+                  <small>Available Groups</small>
+                </label>
+                <select multiple name="available_group" className="form-control" style={{ width: '25vw' }}>
+                  {availableGroupData.map((group, index) => (
+                    <option key={index} value={group.groupName}>
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="d-flex flex-column justify-content-between mt-4">
+                <button type="button" className="mb-4" onClick={handleAddGroup}>  &gt;&gt; </button>
+                <button type="button" onClick={handleRemoveGroup}> &lt;&lt; </button>
+              </div>
+              <div className="mx-3">
+                <label htmlFor="group-modify" className="mb-1">
+                  <small>Current Groups</small>
+                </label>
+                <select multiple name="current_group" className="form-control" style={{ width: '25vw' }}>
+                  {existingGroupdata.map((group, index) => (
+                    <option key={index} value={group.groupName}>
+                      {group.groupName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
           <div className="form-group mt-3">

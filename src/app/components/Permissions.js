@@ -4,8 +4,8 @@ async function checkForCookie()
 {
     try
     {
-        const response = await Axios.get("/validateCookie", { withCredentials: true });
-        if (response.data.hasCookie == true)
+        const response = await Axios.get("/getUser", { withCredentials: true });
+        if (response.data.username)
         {
             return true;
         }
@@ -13,7 +13,7 @@ async function checkForCookie()
     }
     catch (error)
     {
-        throw new Error(`Failed to check for cookie: ${error.message}`);
+        //throw new Error(`Failed to check for cookie: ${error.message}`);
     }
 }
 

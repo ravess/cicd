@@ -20,7 +20,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/checkGroup", { role: "\\.Admin\\." }, { withCredentials: true });
+      const response = await Axios.post("/checkGroup", { group: "Admin" }, { withCredentials: true });
       setIsLoading(false);
     } catch (e) 
     {
@@ -35,8 +35,6 @@ function ManageUsers()
     {
       const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
-      console.log("GetGroups success! Response size: " + response.data.data.length);
-      console.log(response.data.data);
     } catch (e) 
     {
       appDispatch({ type: "flashMessage", value: "Error getting groups." });
@@ -61,8 +59,6 @@ function ManageUsers()
     {
       const response = await Axios.get("/users", { withCredentials: true });
       setUserData(response.data.data);
-      console.log("GetUsers success! Response size : " + response.data.data.length);
-      console.log(response.data.data);
     } catch (e) 
     {
       console.log(e);

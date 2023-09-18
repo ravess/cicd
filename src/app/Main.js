@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { checkForCookie } from "./components/Permissions";
 import Axios from "axios";
 Axios.defaults.baseURL = "http://localhost:8080";
+Axios.defaults.withCredentials = true;
 
 import StateContext from "./StateContext";
 import DispatchContext from "./DispatchContext";
@@ -21,12 +22,11 @@ import ManageUsers from "./components/ManageUsers";
 import ModifyProfile from "./components/ModifyProfile";
 import CreateUser from "./components/CreateUser";
 import Board from "./components/Board";
-import LoadingDotsIcon from "./components/LoadingDotsIcon";
 
 function Main()
 {
   const initialState = {
-    loggedIn: false,
+    loggedIn: null,
     flashMessages: [],
     dbChange: 0,
     isAdmin: false,

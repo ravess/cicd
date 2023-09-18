@@ -15,10 +15,20 @@ function HeaderLoggedIn(props)
     try
     {
       const response = await Axios.post("/checkGroup",
-        { role: "\\.Admin\\." },
+        {
+          group: "Admin"
+        },
         { withCredentials: true }
       );
-      return true;
+      console.log(response.data.ingroup);
+      if (response.data.ingroup.toLowerCase() == "true")
+      {
+        return true
+      }
+      else
+      {
+        return false
+      }
     } catch (e)
     {
       return false;
@@ -42,6 +52,7 @@ function HeaderLoggedIn(props)
     } else
     {
       appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
+      appDispatch({ type: "removeAdmin" });
     }
   }
 
