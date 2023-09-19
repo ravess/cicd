@@ -34,7 +34,7 @@ function ModifyProfile()
   {
     try
     {
-      const response = await Axios.post(
+      const response = await Axios.put(
         "/updateProfile",
         {
           email: email ? email : "",
