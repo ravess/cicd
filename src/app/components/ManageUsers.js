@@ -81,7 +81,8 @@ function ManageUsers()
     async function cookieCheck()
     {
       const hasCookie = await checkForCookie();
-      if (hasCookie == false)
+      console.log("In manage users cookie check: " + hasCookie);
+      if (!hasCookie || hasCookie == false)
       {
         appDispatch({ type: "logout" });
         appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });

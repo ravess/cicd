@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import StateContext from "../StateContext";
 import DispatchContext from "../DispatchContext";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import { checkForCookie } from "./Permissions";
@@ -9,7 +8,6 @@ import Axios from "axios";
 
 function CreateUser()
 {
-  const appState = useContext(StateContext);
   const appDispatch = useContext(DispatchContext);
   const navigate = useNavigate();
 
@@ -93,26 +91,23 @@ function CreateUser()
             },
             { withCredentials: true }
           );
+          e.target.reset()
+          getGroups();
+          setChosenGroupData([]);
           appDispatch({ type: "flashMessage", value: "User successfully created!" });
-          return true;
+          appDispatch({ type: "dbChange" });
         } catch (e)
         {
-          console.log(e);
-          appDispatch({ type: "flashMessage", value: "Error creating user." });
-          return false;
+          if (e.response.status === 401 || e.response.status === 403)
+          {
+            appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
+            appDispatch({ type: "removeAdmin" });
+            navigate("/");
+          }
+          appDispatch({ type: "flashMessage", value: "Duplicate username detected. Please enter a unique username." });
         }
       }
-
-      if (await createProfile() === true)
-      {
-        e.target.reset()
-        getGroups();
-        setChosenGroupData([]);
-        appDispatch({ type: "dbChange" });
-      } else
-      {
-        appDispatch({ type: "flashMessage", value: "Duplicate username detected. Please enter a unique username." });
-      }
+      createProfile();
     }
   }
 
@@ -178,12 +173,17 @@ function CreateUser()
 
   useEffect(() =>
   {
-    if (checkForCookie() == true)
+    async function cookieCheck()
     {
-      appDispatch({ type: "logout" });
-      appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
-      navigate("/");
+      const hasCookie = await checkForCookie();
+      if (!hasCookie || hasCookie == false)
+      {
+        appDispatch({ type: "logout" });
+        appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
+        navigate("/");
+      }
     }
+    cookieCheck();
     isAdmin();
     getGroups();
   }, []);

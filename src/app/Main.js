@@ -84,7 +84,6 @@ function Main()
         dispatch({ type: hasCookie ? "login" : "logout" });
       } catch (error)
       {
-        console.log(error);
         dispatch({ type: "flashMessage", value: "Error connecting to backend." });
       }
       finally

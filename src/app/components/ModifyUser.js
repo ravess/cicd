@@ -16,7 +16,7 @@ function ModifyUser()
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState([]);
   const [groupData, setGroupData] = useState([]);
-  const [existingGroupdata, setExistingGroupData] = useState([]);
+  const [existingGroupData, setExistingGroupData] = useState([]);
   const [availableGroupData, setAvailableGroupData] = useState([]);
 
   async function isAdmin()
@@ -84,7 +84,7 @@ function ModifyUser()
     for (let [key, value] of formData.entries()) { data[key] = value; }
 
     //Parse the data for database insertion.
-    const chosenGroupArray = existingGroupdata.map((item) => item.groupName);
+    const chosenGroupArray = existingGroupData.map((item) => item.groupName);
     chosenGroupArray.sort((a, b) => a.localeCompare(b));
     const allGroups = "." + chosenGroupArray.join(".") + ".";
 
@@ -108,22 +108,20 @@ function ModifyUser()
             { withCredentials: true }
           );
           appDispatch({ type: "flashMessage", value: "User Info successfully changed!" });
-          return true;
+          appDispatch({ type: "dbChange" });
+          navigate("/users");
         } catch (e)
         {
+          if (e.response.status === 401 || e.response.status === 403)
+          {
+            appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
+            appDispatch({ type: "removeAdmin" });
+            navigate("/");
+          }
           appDispatch({ type: "flashMessage", value: "User creation error." });
-          return false;
         }
       }
-
-      if (await updateProfile())
-      {
-        navigate("/users");
-        appDispatch({ type: "dbChange" });
-      } else
-      {
-        appDispatch({ type: "flashMessage", value: "Duplicate username detected. Please enter a unique username." });
-      }
+      updateProfile();
     }
   }
 
@@ -193,7 +191,7 @@ function ModifyUser()
     async function cookieCheck()
     {
       const hasCookie = await checkForCookie();
-      if (hasCookie == false)
+      if (!hasCookie || hasCookie == false)
       {
         appDispatch({ type: "logout" });
         appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
@@ -209,11 +207,12 @@ function ModifyUser()
 
   useEffect(() =>
   {
+
     const filteredGroups = groupData.filter((group1) =>
-      !existingGroupdata.some((group2) => group1.groupName === group2.groupName)
+      !existingGroupData.some((group2) => group1.groupName === group2.groupName)
     );
     setAvailableGroupData(filteredGroups);
-  }, [groupData]);
+  }, [groupData, existingGroupData]);
 
   if (isLoading)
   {
@@ -270,7 +269,7 @@ function ModifyUser()
                   <small>Current Groups</small>
                 </label>
                 <select multiple name="current_group" className="form-control" style={{ width: '25vw' }}>
-                  {existingGroupdata.map((group, index) => (
+                  {existingGroupData.map((group, index) => (
                     <option key={index} value={group.groupName}>
                       {group.groupName}
                     </option>
