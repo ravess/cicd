@@ -21,7 +21,17 @@ function ManageUsers()
     try 
     {
       const response = await Axios.post("/checkGroup", { group: "Admin" }, { withCredentials: true });
-      setIsLoading(false);
+      if (response.data.ingroup.toLowerCase() == "true")
+      {
+        setIsLoading(false);
+      }
+      else
+      {
+        appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
+        appDispatch({ type: "removeAdmin" });
+        navigate("/");
+      }
+
     } catch (e) 
     {
       appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
@@ -37,7 +47,7 @@ function ManageUsers()
       setGroupData(response.data.data);
     } catch (e) 
     {
-      appDispatch({ type: "flashMessage", value: "Error getting groups." });
+      //appDispatch({ type: "flashMessage", value: "Error getting groups." });
     }
   }
 
@@ -61,8 +71,7 @@ function ManageUsers()
       setUserData(response.data.data);
     } catch (e) 
     {
-      console.log(e);
-      appDispatch({ type: "flashMessage", value: "Error getting users." });
+      //appDispatch({ type: "flashMessage", value: "Error getting users." });
     }
   }
 

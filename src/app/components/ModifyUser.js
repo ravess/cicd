@@ -21,14 +21,21 @@ function ModifyUser()
 
   async function isAdmin()
   {
-    try
+    try 
     {
-      const response = await Axios.post("/checkGroup",
-        { group: "Admin" },
-        { withCredentials: true }
-      );
-      setIsLoading(false);
-    } catch (e)
+      const response = await Axios.post("/checkGroup", { group: "Admin" }, { withCredentials: true });
+      if (response.data.ingroup.toLowerCase() == "true")
+      {
+        setIsLoading(false);
+      }
+      else
+      {
+        appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
+        appDispatch({ type: "removeAdmin" });
+        navigate("/");
+      }
+
+    } catch (e) 
     {
       appDispatch({ type: "flashMessage", value: "You do not have permissions to use this feature." });
       navigate("/");

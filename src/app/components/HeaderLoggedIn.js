@@ -20,7 +20,6 @@ function HeaderLoggedIn(props)
         },
         { withCredentials: true }
       );
-      console.log(response.data.ingroup);
       if (response.data.ingroup.toLowerCase() == "true")
       {
         return true
