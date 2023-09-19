@@ -61,10 +61,13 @@ function ModifyProfile()
     {
       appDispatch({ type: "flashMessage", value: "Please enter the information you would like to change." });
     }
-    else if (data.password && !data.password.match(`^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$`))
+    else if (data.password && !data.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/))
     {
       appDispatch({ type: "flashMessage", value: "Your password does not match the requirements." });
-      e.target.reset();
+    }
+    else if (data.email && !data.email.match(/[\w.-]+@[\w.-]+\.[A-Za-z]{2,4}/))
+    {
+      appDispatch({ type: "flashMessage", value: "Your email does not match the requirements." });
     }
     else
     {
@@ -99,7 +102,7 @@ function ModifyProfile()
 
           <div className="form-group">
             <label htmlFor="email-modify" className="mb-1">
-              <small>Email</small>
+              <small>Email (e.g. user@domain.com)</small>
             </label>
             <input id="email-modify" name="email" className="form-control" type="text" placeholder={userData.email} />
           </div>

@@ -209,7 +209,7 @@ function CreateUser()
 
           <div className="form-group">
             <label htmlFor="email-modify" className="mb-1">
-              <small>Email</small>
+              <small>Email (e.g. user@domain.com)</small>
             </label>
             <input id="email-modify" name="email" className="form-control" type="text" placeholder="Enter new email" />
           </div>
