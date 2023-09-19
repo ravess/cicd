@@ -142,7 +142,7 @@ function ManageUsers()
       </div>
 
       <div className="row gw-3">
-        <div className="col-9">
+        <div className="col-md-9">
           <table className="mt-3 table table-striped">
             <thead className="thead-dark">
               <tr>
@@ -171,7 +171,7 @@ function ManageUsers()
           </table>
         </div>
 
-        <div className="col-3">
+        <div className="col-md-3">
           <table className="mt-3 table table-striped">
             <thead className="thead-dark">
               <tr>
