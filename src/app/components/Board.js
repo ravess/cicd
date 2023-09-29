@@ -50,9 +50,9 @@ function Board()
     {
         return tasks.reduce((acc, task) =>
         {
-            const { task_state } = task;
+            const { taskState } = task;
 
-            switch (task_state)
+            switch (taskState)
             {
                 case 'OPEN':
                     return { ...acc, openState: [...acc.openState, task] };
@@ -84,10 +84,10 @@ function Board()
             // getApp();
             // Map the user's groups to their corresponding app_permit_* values
             const userGroupPermissions = {
-                openState: userData.userGroup.includes("." + appData.app_permit_open + "."),
-                todoState: userData.userGroup.includes("." + appData.app_permit_todolist + "."),
-                doingState: userData.userGroup.includes("." + appData.app_permit_doing + "."),
-                doneState: userData.userGroup.includes("." + appData.app_permit_done + "."),
+                openState: userData.groups.includes("." + appData.appPermitOpen + "."),
+                todoState: userData.groups.includes("." + appData.appPermitToDoList + "."),
+                doingState: userData.groups.includes("." + appData.appPermitDoing + "."),
+                doneState: userData.groups.includes("." + appData.appPermitDone + "."),
             };
             return userGroupPermissions[state];
         } catch (e)
@@ -98,8 +98,11 @@ function Board()
 
     function getPlanColor(planName)
     {
-        const plan = planData.find((plan) => plan.plan_mvp_name === planName);
-        return plan ? plan.plan_colour : '#939393'; // Default color if plan is not found
+        if (planData)
+        {
+            const plan = planData.find((plan) => plan.planMVPName === planName);
+            return plan ? plan.planColor : '#939393'; // Default color if plan is not found
+        }
     }
 
     // Function to check if the user has permission for a specific state
@@ -107,8 +110,9 @@ function Board()
     {
         try
         {
-            const response = await Axios.get("/getUser", { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.get("/getUser", { withCredentials: true });
             setUserData(response.data);
+            // console.log(JSON.stringify(response.data));
         } catch (e)
         {
             appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
@@ -120,7 +124,7 @@ function Board()
     {
         try
         {
-            const response = await Axios.get("/getGroups", { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.get("/getGroups", { withCredentials: true });
             setGroupData(response.data.data);
         } catch (e)
         {
@@ -132,7 +136,7 @@ function Board()
     {
         try 
         {
-            const response = await Axios.post("/getTasks", { app_acronym: app_acronym_param }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.get(`/apps/${app_acronym_param}/tasks`, { withCredentials: true });
             const organizedTasks = organizeTasksByState(response.data.data);
             setTaskData(organizedTasks);
         } catch (e) 
@@ -145,8 +149,9 @@ function Board()
     {
         try 
         {
-            const response = await Axios.post("/getPlans", { plan_app_acronym: app_acronym_param }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.get(`/apps/${app_acronym_param}/plans`, { withCredentials: true });
             setPlanData(response.data.data);
+            // console.log(JSON.stringify(response.data.data));
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Plans." });
@@ -157,8 +162,9 @@ function Board()
     {
         try 
         {
-            const response = await Axios.post("/getPlan", { plan_mvp_name: planName }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
-            return (response.data.data[0]);
+            const response = await Axios.get(`/apps/${app_acronym_param}/plans/${planName}`, { withCredentials: true });
+            //console.log(response.data);
+            return (response.data.data);
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Plan." });
@@ -169,8 +175,8 @@ function Board()
     {
         try 
         {
-            const response = await Axios.post("/getApps", {}, { headers: { Authorization: `Bearer ${appState.user.token}` } });
-            // console.log("getApps Response : " + JSON.stringify(response.data.data));
+            const response = await Axios.get("/apps", {}, { withCredentials: true });
+            //console.log("getApps Response : " + JSON.stringify(response.data.data));
             setAllApps(response.data.data);
         } catch (e) 
         {
@@ -182,10 +188,9 @@ function Board()
     {
         try 
         {
-            const response = await Axios.post("/getApp", { app_acronym: app_acronym_param }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
-            //console.log("getApp Response : " + JSON.stringify(response.data.data));
-            setAppData(response.data.data[0]);
-            //console.log(response.data.data[0]);
+            const response = await Axios.get(`/apps/${app_acronym_param}`, { withCredentials: true });
+            // console.log("getApp Response : " + JSON.stringify(response.data));
+            setAppData(response.data.data);
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Apps." });
@@ -204,16 +209,20 @@ function Board()
     const handleStateAuthorisation = async (state) =>
     {
         const sanitisedState = state.replace("State", "").toUpperCase();
+        console.log("AppAcro: " + appData.appAcronym + " Sanitised State: " + sanitisedState);
         try
         {
-            const response = await Axios.post("/hasAccessTo", { app_acronym: appData.app_acronym, app_state: sanitisedState }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
+            const response = await Axios.post("/hasAccess", { appAcronym: appData.appAcronym, appState: sanitisedState }, { withCredentials: true });
             if (response.data.allowedAccess === false)
             {
+                console.log("AA: " + allowedAccess);
                 appDispatch({ type: "flashMessage", value: "You do not have permission to access this resource." });
                 getUser();
                 getApp();
             }
+            console.log("AA: false");
             return response.data.allowedAccess;
+
         }
         catch (e)
         {
@@ -226,8 +235,8 @@ function Board()
     {
         try
         {
-            const response = await Axios.post("/checkGroup", { group: role }, { headers: { Authorization: `Bearer ${appState.user.token}` } });
-            if (response.data.ingroup === false)
+            const response = await Axios.post("/checkGroup", { group: role }, { withCredentials: true });
+            if (response.data.ingroup === "False")
             {
                 appDispatch({ type: "flashMessage", value: "You do not have permission to access this resource." });
                 getUser();
@@ -283,7 +292,7 @@ function Board()
             <Modal
                 isModalOpen={isModalOpen}
                 closeModal={closeModal}
-                title={`${selectedTaskAction} Task (${task.task_id})`}
+                title={`${selectedTaskAction} Task (${task.taskID})`}
                 content={
                     <>
                         <form id="modalForm">
@@ -292,56 +301,56 @@ function Board()
                                 <label className="mb-1">
                                     <b>Task Name: </b>
                                 </label>
-                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.task_name} disabled />
+                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Description: </b>
                                 </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.task_description} rows="5" disabled />
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Assigned to Plan </b>
                                 </label>
-                                <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.task_plan} disabled />
+                                <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Creator</b>
                                 </label>
-                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.task_creator} disabled />
+                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.taskCreator} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Owner</b>
                                 </label>
-                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.task_owner} disabled />
+                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.taskOwner} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Created</b>
                                 </label>
-                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.task_createdate} disabled />
+                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.taskCreateDate} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>State</b>
                                 </label>
-                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.task_state} disabled />
+                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.taskState} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Notes</b>
                                 </label>
-                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.task_notes ? task.task_notes : ""} rows="10" disabled />
+                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.taskNotes ? task.taskNotes : ""} rows="10" disabled />
                             </div>
 
                         </form>
@@ -393,7 +402,7 @@ function Board()
                                 task_action: selectedTaskAction,
                                 task_owner: userData.username
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         if (selectedTaskAction == "Promote")
                         {
@@ -433,14 +442,14 @@ function Board()
                                 <label className="mb-1">
                                     <b>Task Name: </b>
                                 </label>
-                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.task_name} disabled />
+                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Description: </b>
                                 </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.task_description} rows="5" disabled />
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
                             </div>
 
                             {((task.task_state === "OPEN" && selectedTaskAction !== "Promote") || task.task_state === "DONE" && selectedTaskAction === "Demote") && (
@@ -448,12 +457,12 @@ function Board()
                                     <label className="mb-1">
                                         <b>Assigned to Plan</b>
                                     </label>
-                                    <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.task_plan}>
+                                    <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.taskPlan}>
                                         {/* Render the options based on the planData state */}
                                         <option value="none">None</option>
                                         {planData.map((plan) => (
-                                            <option key={plan.plan_mvp_name} value={plan.plan_mvp_name}>
-                                                {plan.plan_mvp_name}
+                                            <option key={plan.planMVPName} value={plan.planMVPName}>
+                                                {plan.planMVPName}
                                             </option>
                                         ))}
                                     </select>
@@ -465,7 +474,7 @@ function Board()
                                     <label className="mb-1">
                                         <b>Assigned to Plan </b>
                                     </label>
-                                    <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.task_plan} disabled />
+                                    <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
                                 </div>
                             )}
 
@@ -473,35 +482,35 @@ function Board()
                                 <label className="mb-1">
                                     <b>Task Creator</b>
                                 </label>
-                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.task_creator} disabled />
+                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.taskCreator} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Owner</b>
                                 </label>
-                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.task_owner} disabled />
+                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.taskOwner} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Created</b>
                                 </label>
-                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.task_createdate} disabled />
+                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.taskCreateDate} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>State</b>
                                 </label>
-                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.task_state} disabled />
+                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.taskState} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Task Notes</b>
                                 </label>
-                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.task_notes ? task.task_notes : ""} rows="10" disabled />
+                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.taskNotes ? task.taskNotes : ""} rows="10" disabled />
                             </div>
 
                             <div className="form-group">
@@ -555,18 +564,15 @@ function Board()
                                 task_notes: data.task_notes ? data.task_notes : "No creation notes entered.",
                                 task_id: appData.app_acronym + "_" + appData.app_rnumber,
                                 task_plan: data.task_plan ? data.task_plan : "",
-                                task_app_acronym: appData.app_acronym,
-                                task_state: "OPEN",
-                                task_creator: userData.username,
-                                task_owner: userData.username
+                                task_app_acronym: appData.app_acronym
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         await Axios.post("/modifyApp", {
                             app_acronym: appData.app_acronym,
                             app_rnumber: appData.app_rnumber + 1
                         }
-                            , { headers: { Authorization: `Bearer ${appState.user.token}` } });
+                            , { withCredentials: true });
                         appDispatch({ type: "flashMessage", value: "Task successfully created." });
                         return true;
                     } catch (e)
@@ -644,7 +650,7 @@ function Board()
             <Modal
                 isModalOpen={isModalOpen}
                 closeModal={closeModal}
-                title={`Edit Application`}
+                title={`View Application`}
                 content={
                     <>
                         <form id="modalForm">
@@ -653,28 +659,28 @@ function Board()
                                 <label className="mb-1">
                                     <b>Application Acronym</b>
                                 </label>
-                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.app_acronym} autoComplete="off" disabled />
+                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.appAcronym} autoComplete="off" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application Description</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.app_description} autoComplete="off" rows="4" disabled />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} autoComplete="off" rows="4" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application Start Date</b>
                                 </label>
-                                <input id="app_start_date" name="app_start_date" className="form-control" type="text" autoComplete="off" defaultValue={appData.app_start_date ? appData.app_start_date : ""} disabled />
+                                <input id="app_start_date" name="app_start_date" className="form-control" type="text" autoComplete="off" defaultValue={appData.appStartDate ? appData.appStartDate : ""} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application End Date</b>
                                 </label>
-                                <input id="app_end_date" name="app_end_date" className="form-control" type="text" autoComplete="off" defaultValue={appData.app_end_date ? appData.app_end_date : ""} disabled />
+                                <input id="app_end_date" name="app_end_date" className="form-control" type="text" autoComplete="off" defaultValue={appData.appEndDate ? appData.appEndDate : ""} disabled />
                             </div>
 
                         </form>
@@ -694,7 +700,7 @@ function Board()
             e.preventDefault();
 
             refreshData();
-            if (await handleGroupAuthorisation("\\.Project Lead\\.") === false)
+            if (await handleGroupAuthorisation("ProjectLead") === false)
             {
                 console.log("NO AUTHORISATION");
                 window.scrollTo(0, 0);
@@ -722,9 +728,9 @@ function Board()
                                 app_permit_doing: data.permit_doing,
                                 app_permit_done: data.permit_done,
                                 app_permit_create: data.permit_create,
-                                groups: "\\.Project Lead\\."
+                                groups: "ProjectLead"
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         appDispatch({ type: "flashMessage", value: "Application successfully modified!" });
                         return true;
@@ -753,42 +759,42 @@ function Board()
                                 <label className="mb-1">
                                     <b>Application Acronym</b>
                                 </label>
-                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.app_acronym} autoComplete="off" disabled />
+                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.appAcronym} autoComplete="off" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application Description</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.app_description} autoComplete="off" rows="4" disabled />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} autoComplete="off" rows="4" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application Release Number</b>
                                 </label>
-                                <input id="app_rnumber" name="app_rnumber" className="form-control" type="text" placeholder={appData.app_rnumber} autoComplete="off" disabled />
+                                <input id="app_rnumber" name="app_rnumber" className="form-control" type="text" placeholder={appData.appRNumber} autoComplete="off" disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application Start Date</b>
                                 </label>
-                                <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.app_start_date ? appData.app_start_date : ""} />
+                                <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appStartDate ? appData.appStartDate : ""} />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application End Date</b>
                                 </label>
-                                <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.app_end_date ? appData.app_end_date : ""} />
+                                <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appEndDate ? appData.appEndDate : ""} />
                             </div>
 
                             <div className="form-group">
                                 <label htmlFor="group-modify" className="mb-1">
                                     <b>Permission to promote from [Open] State</b>
                                 </label>
-                                <select name="permit_open" className="form-control" defaultValue={appData.app_permit_open}>
+                                <select name="permit_open" className="form-control" defaultValue={appData.appPermitOpen}>
                                     <option value="none">None</option>
                                     {groupData.map((group, index) => (
                                         <option key={index} value={group.groupName}>
@@ -802,7 +808,7 @@ function Board()
                                 <label htmlFor="group-modify" className="mb-1">
                                     <b>Permission to promote/demote from [Todo] State</b>
                                 </label>
-                                <select name="permit_todo" className="form-control" defaultValue={appData.app_permit_todolist}>
+                                <select name="permit_todo" className="form-control" defaultValue={appData.appPermitToDoList}>
                                     <option value="none">None</option>
                                     {groupData.map((group, index) => (
                                         <option key={index} value={group.groupName}>
@@ -816,7 +822,7 @@ function Board()
                                 <label htmlFor="group-modify" className="mb-1">
                                     <b>Permission to promote/demote from [Doing] State</b>
                                 </label>
-                                <select name="permit_doing" className="form-control" defaultValue={appData.app_permit_doing}>
+                                <select name="permit_doing" className="form-control" defaultValue={appData.appPermitDoing}>
                                     <option value="none">None</option>
                                     {groupData.map((group, index) => (
                                         <option key={index} value={group.groupName}>
@@ -830,7 +836,7 @@ function Board()
                                 <label htmlFor="group-modify" className="mb-1">
                                     <b>Permission to promote/demote from [Done] State</b>
                                 </label>
-                                <select name="permit_done" className="form-control" defaultValue={appData.app_permit_done}>
+                                <select name="permit_done" className="form-control" defaultValue={appData.appPermitDone}>
                                     <option value="none">None</option>
                                     {groupData.map((group, index) => (
                                         <option key={index} value={group.groupName}>
@@ -844,7 +850,7 @@ function Board()
                                 <label htmlFor="group-modify" className="mb-1">
                                     <b>Permission to create tasks</b>
                                 </label>
-                                <select name="permit_create" className="form-control" defaultValue={appData.app_permit_create}>
+                                <select name="permit_create" className="form-control" defaultValue={appData.appPermitCreate}>
                                     <option value="none">None</option>
                                     {groupData.map((group, index) => (
                                         <option key={index} value={group.groupName}>
@@ -872,7 +878,7 @@ function Board()
             e.preventDefault();
             refreshData();
 
-            if (await handleGroupAuthorisation("\\.Project Lead\\.") === false)
+            if (await handleGroupAuthorisation("ProjectLead") === false)
             {
                 window.scrollTo(0, 0);
                 closeModal();
@@ -896,21 +902,20 @@ function Board()
                     try
                     {
                         const response = await Axios.post(
-                            "/createApp",
+                            "/apps/new",
                             {
-                                app_acronym: data.app_acronym,
-                                app_description: data.app_description,
-                                app_rnumber: data.app_rnumber,
-                                app_start_date: data.app_start_date,
-                                app_end_date: data.app_end_date,
-                                app_permit_open: data.permit_open,
-                                app_permit_todo: data.permit_todo,
-                                app_permit_doing: data.permit_doing,
-                                app_permit_done: data.permit_done,
-                                app_permit_create: data.permit_create,
-                                groups: "\\.Project Lead\\."
+                                appAcronym: data.app_acronym,
+                                appDescription: data.app_description,
+                                appRNumber: data.app_rnumber,
+                                appStartDate: data.app_start_date,
+                                appEndDate: data.app_end_date,
+                                appPermitOpen: data.permit_open,
+                                appPermitToDoList: data.permit_todo,
+                                appPermitDoing: data.permit_doing,
+                                appPermitDone: data.permit_done,
+                                appPermitCreate: data.permit_create
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         appDispatch({ type: "flashMessage", value: "Application successfully created!" });
                         return true;
@@ -920,7 +925,7 @@ function Board()
                         return false;
                     }
                 }
-                CreateApp().then(getApps()).then(navigate(`/board/${data.app_acronym}`));
+                CreateApp().then(getApps()).then(navigate(`/board/${data.app_acronym}`)).then(getTasks());
                 window.scrollTo(0, 0);
                 closeModal();
             }
@@ -1059,7 +1064,7 @@ function Board()
 
             refreshData();
 
-            if (await handleGroupAuthorisation("\\.Project Manager\\.") === false)
+            if (await handleGroupAuthorisation("ProjectManager") === false)
             {
                 window.scrollTo(0, 0);
                 closeModal();
@@ -1088,9 +1093,9 @@ function Board()
                                 plan_start_date: data.plan_start_date,
                                 plan_end_date: data.plan_end_date,
                                 plan_colour: data.plan_colour,
-                                groups: "\\.Project Manager\\."
+                                groups: "ProjectManager"
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         appDispatch({ type: "flashMessage", value: "Plan successfully created!" });
                         return true;
@@ -1168,7 +1173,7 @@ function Board()
 
             refreshData();
 
-            if (await handleGroupAuthorisation("\\.Project Manager\\.") === false)
+            if (await handleGroupAuthorisation("ProjectManager") === false)
             {
                 window.scrollTo(0, 0);
                 closeModal();
@@ -1189,9 +1194,9 @@ function Board()
                                 plan_mvp_name: selectedPlan.plan_mvp_name,
                                 plan_start_date: data.plan_start_date,
                                 plan_end_date: data.plan_end_date,
-                                groups: "\\.Project Manager\\."
+                                groups: "ProjectManager"
                             },
-                            { headers: { Authorization: `Bearer ${appState.user.token}` } }
+                            { withCredentials: true }
                         );
                         appDispatch({ type: "flashMessage", value: "Plan successfully modified!" });
                         return true;
@@ -1220,8 +1225,8 @@ function Board()
                                 <select className="form-control" name="dropdownMenuButton" onChange={getSelectedPlan}>
                                     <option value="">Select Plan</option>
                                     {planData.map((plan) => (
-                                        <option key={plan.plan_mvp_name} value={plan.plan_mvp_name}>
-                                            {plan.plan_mvp_name}
+                                        <option key={plan.planMVPName} value={plan.planMVPName}>
+                                            {plan.planMVPName}
                                         </option>
                                     ))}
                                 </select>
@@ -1231,14 +1236,14 @@ function Board()
                                 <label className="mb-1">
                                     <b>Application Start Date</b>
                                 </label>
-                                <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.plan_start_date : ""} />
+                                <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planStartDate : ""} />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application End Date</b>
                                 </label>
-                                <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.plan_end_date : ""} />
+                                <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planEndDate : ""} />
                             </div>
 
                         </form>
@@ -1264,7 +1269,7 @@ function Board()
             <Modal
                 isModalOpen={isModalOpen}
                 closeModal={closeModal}
-                title={`Edit Plan`}
+                title={`View Plan`}
                 content={
                     <>
                         <form id="modalForm">
@@ -1273,8 +1278,8 @@ function Board()
                                 <select className="form-control" name="dropdownMenuButton" onChange={getSelectedPlan}>
                                     <option value="">Select Plan</option>
                                     {planData.map((plan) => (
-                                        <option key={plan.plan_mvp_name} value={plan.plan_mvp_name}>
-                                            {plan.plan_mvp_name}
+                                        <option key={plan.planMVPName} value={plan.planMVPName}>
+                                            {plan.planMVPName}
                                         </option>
                                     ))}
                                 </select>
@@ -1284,14 +1289,14 @@ function Board()
                                 <label className="mb-1">
                                     <b>Application Start Date</b>
                                 </label>
-                                <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.plan_start_date : ""} disabled />
+                                <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planStartDate : ""} disabled />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
                                     <b>Application End Date</b>
                                 </label>
-                                <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.plan_end_date : ""} disabled />
+                                <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planEndDate : ""} disabled />
                             </div>
 
                         </form>
@@ -1323,6 +1328,8 @@ function Board()
     //Execute when location changes
     useEffect(() =>
     {
+        console.log("REFRESH DATA");
+        console.log(app_acronym_param);
         refreshData();
     }, [location]);
 
@@ -1330,22 +1337,22 @@ function Board()
         <Page title="Task Management System" wide={true}>
             <div className="d-flex justify-content-between">
                 <div className="d-flex justify-content-start">
-                    {userData.userGroup && userData.userGroup.includes("Project Lead") && (
+                    {userData.groups && userData.groups.includes("ProjectLead") && (
                         <div className="flex-row mr-3">
-                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("\\.Project Lead\\.")) ? setIsCreateAppOpen(true) : null; }}>
+                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("ProjectLead")) ? setIsCreateAppOpen(true) : null; }}>
                                 Create Application</button>
                         </div>
                     )}
 
-                    {app_acronym_param && appData && userData.userGroup.includes("Project Manager") && (
+                    {app_acronym_param && appData && userData.groups.includes("ProjectManager") && (
                         <div className="flex-row mr-3">
-                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("\\.Project Manager\\.")) ? setIsCreatePlanOpen(true) : null; }}>
+                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("ProjectManager")) ? setIsCreatePlanOpen(true) : null; }}>
                                 Create Plan</button>
                         </div>
                     )}
-                    {app_acronym_param && appData && userData.userGroup.includes(appData.app_permit_create) && (
+                    {app_acronym_param && appData && userData.groups.includes(appData.appPermitCreate) && (
                         <div className="flex-row">
-                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation(`\\.${appData.app_permit_create}\\.`)) ? setIsCreateTaskOpen(true) : null; }}>
+                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation(`${appData.appPermitCreate}`)) ? setIsCreateTaskOpen(true) : null; }}>
                                 Create Task</button>
                         </div>
                     )}
@@ -1354,28 +1361,28 @@ function Board()
                 <h3>{app_acronym_param}</h3>
 
                 <div className="d-flex justify-content-end">
-                    {app_acronym_param && appData && userData.userGroup.includes("Project Lead") && (
+                    {app_acronym_param && appData && userData.groups.includes("ProjectLead") && (
                         <div className="mr-3">
-                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("\\.Project Lead\\.")) ? setIsEditAppOpen(true) : null; }}>
+                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("ProjectLead")) ? setIsEditAppOpen(true) : null; }}>
                                 View/Edit Application</button>
                         </div>
                     )}
 
-                    {app_acronym_param && appData && !userData.userGroup.includes("Project Lead") && (
+                    {app_acronym_param && appData && !userData.groups.includes("ProjectLead") && (
                         <div className="mr-3">
                             <button className="btn btn-md btn-secondary" onClick={() => setIsViewAppOpen(true)}>
                                 View Application</button>
                         </div>
                     )}
 
-                    {app_acronym_param && appData && userData.userGroup.includes("Project Manager") && (
+                    {app_acronym_param && appData && userData.groups.includes("ProjectManager") && (
                         <div className="mr-3">
-                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("\\.Project Manager\\.")) ? setIsEditPlanOpen(true) : null; }}>
+                            <button className="btn btn-md btn-secondary" onClick={async () => { (await handleGroupAuthorisation("ProjectManager")) ? setIsEditPlanOpen(true) : null; }}>
                                 View/Edit Plan</button>
                         </div>
                     )}
 
-                    {app_acronym_param && appData && !userData.userGroup.includes("Project Manager") && (
+                    {app_acronym_param && appData && !userData.groups.includes("ProjectManager") && (
                         <div className="mr-3">
                             <button className="btn btn-md btn-secondary" onClick={() => setIsViewPlanOpen(true)}>
                                 View Plan</button>
@@ -1388,7 +1395,7 @@ function Board()
                         </button>
                         <div className="dropdown-menu">
                             {allApps.map((app, index) => (
-                                <Link key={index} className="dropdown-item" to={`/board/${app.app_acronym}`}>{app.app_acronym}</Link>
+                                <Link key={index} className="dropdown-item" to={`/board/${app.appAcronym}`}>{app.appAcronym}</Link>
                             ))}
                         </div>
                     </div>
@@ -1398,14 +1405,14 @@ function Board()
             {/* Kanban Board Container */}
             <div className="kanban-board my-3">
                 {/* Nested .map() to generate columns and cards */}
+
                 {Object.entries(taskData).map(([state, tasks]) => (
                     <div key={state} className="kanban-column">
                         <h3 className="text-center my-1">{state.charAt(0).toUpperCase() + state.slice(1).replace("State", "")}</h3>
-                        {tasks.map((task) => (
-                            <div key={task.task_name} className="kanban-card text-center" style={{ borderColor: getPlanColor(task.task_plan) }}>
-                                <b>({task.task_id})<br /></b>
-                                {task.task_name}<br />
-                                {task.task_description}<br />
+                        {app_acronym_param && (tasks.map((task) => (
+                            <div key={task.taskName} className="kanban-card text-center" style={{ borderColor: getPlanColor(task.taskPlan) }}>
+                                <b>({task.taskID})<br /></b>
+                                {task.taskName}<br />
                                 {state.toUpperCase() !== "OPENSTATE" && state.toUpperCase() !== "TODOSTATE" && hasPermissionForState(state) && ( // Check the state here
                                     <button className="btn btn-sm btn-secondary mx-3 mt-2" onClick={async () =>
                                     {
@@ -1431,7 +1438,8 @@ function Board()
                                     }}>&gt;&gt;</button>
                                 )}
                             </div>
-                        ))}
+                        )))}
+
                     </div>
                 ))}
             </div >
