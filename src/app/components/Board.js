@@ -557,22 +557,19 @@ function Board()
                     {
                         await getApp();
                         const response = await Axios.post(
-                            "/createTask",
+                            `/apps/${app_acronym_param}/tasks/new`,
                             {
-                                task_name: data.task_name ? data.task_name : "",
-                                task_description: data.task_description ? data.task_description : "",
-                                task_notes: data.task_notes ? data.task_notes : "No creation notes entered.",
-                                task_id: appData.app_acronym + "_" + appData.app_rnumber,
-                                task_plan: data.task_plan ? data.task_plan : "",
-                                task_app_acronym: appData.app_acronym
+                                taskName: data.task_name ? data.task_name : "",
+                                taskDescription: data.task_description ? data.task_description : "",
+                                taskNotes: data.task_notes ? data.task_notes : "No creation notes entered.",
+                               
+                                taskPlan: data.task_plan ? data.task_plan : ""
+                              
                             },
                             { withCredentials: true }
                         );
-                        await Axios.post("/modifyApp", {
-                            app_acronym: appData.app_acronym,
-                            app_rnumber: appData.app_rnumber + 1
-                        }
-                            , { withCredentials: true });
+                        
+                             
                         appDispatch({ type: "flashMessage", value: "Task successfully created." });
                         return true;
                     } catch (e)
@@ -617,10 +614,10 @@ function Board()
                                 </label>
                                 <select className="form-control" id="task_plan" name="task_plan" defaultValue="none">
                                     {/* Render the options based on the planData state */}
-                                    <option value="none">None</option>
+                                    <option value="">None</option>
                                     {planData.map((plan) => (
-                                        <option key={plan.plan_mvp_name} value={plan.plan_mvp_name}>
-                                            {plan.plan_mvp_name}
+                                        <option key={plan.planMVPName} value={plan.planMVPName}>
+                                            {plan.planMVPName}
                                         </option>
                                     ))}
                                 </select>
