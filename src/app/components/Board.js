@@ -1086,14 +1086,14 @@ function Board()
                     try
                     {
                         const response = await Axios.post(
-                            "/createPlan",
+                            `/apps/${app_acronym_param}/plans/new`,
                             {
-                                plan_app_acronym: app_acronym_param,
-                                plan_mvp_name: data.plan_mvp_name,
-                                plan_start_date: data.plan_start_date,
-                                plan_end_date: data.plan_end_date,
-                                plan_colour: data.plan_colour,
-                                groups: "ProjectManager"
+                                // plan_app_acronym: app_acronym_param,
+                                planMVPName: data.plan_mvp_name,
+                                planStartDate: data.plan_start_date,
+                                planEndDate: data.plan_end_date,
+                                planColor: data.plan_colour,
+                                // groups: "ProjectManager"
                             },
                             { withCredentials: true }
                         );
@@ -1129,14 +1129,14 @@ function Board()
 
                             <div className="form-group">
                                 <label className="mb-1">
-                                    <b>Application Start Date</b>
+                                    <b>Plan Start Date</b>
                                 </label>
                                 <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" autoComplete="off" />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
-                                    <b>Application End Date</b>
+                                    <b>Plan End Date</b>
                                 </label>
                                 <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" autoComplete="off" />
                             </div>
@@ -1189,12 +1189,12 @@ function Board()
                     try
                     {
                         const response = await Axios.post(
-                            "/modifyPlan",
+                            `/apps/${app_acronym_param}/plans/${selectedPlan.plan_mvp_name}/edit`,
                             {
-                                plan_mvp_name: selectedPlan.plan_mvp_name,
-                                plan_start_date: data.plan_start_date,
-                                plan_end_date: data.plan_end_date,
-                                groups: "ProjectManager"
+                                // planMVPName: selectedPlan.plan_mvp_name,
+                                planStartDate: data.plan_start_date,
+                                planEndDate: data.plan_end_date,
+                                // groups: "ProjectManager"
                             },
                             { withCredentials: true }
                         );
@@ -1222,6 +1222,9 @@ function Board()
                         <form id="modalForm" onSubmit={handleSaveChanges}>
 
                             <div className="dropdown form-group">
+                            <label className="mb-1">
+                                <b>Plan</b>
+                            </label>
                                 <select className="form-control" name="dropdownMenuButton" onChange={getSelectedPlan}>
                                     <option value="">Select Plan</option>
                                     {planData.map((plan) => (
@@ -1234,14 +1237,14 @@ function Board()
 
                             <div className="form-group">
                                 <label className="mb-1">
-                                    <b>Application Start Date</b>
+                                    <b>Plan Start Date</b>
                                 </label>
                                 <input id="plan_start_date" name="plan_start_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planStartDate : ""} />
                             </div>
 
                             <div className="form-group">
                                 <label className="mb-1">
-                                    <b>Application End Date</b>
+                                    <b>Plan End Date</b>
                                 </label>
                                 <input id="plan_end_date" name="plan_end_date" className="form-control" type="date" defaultValue={selectedPlan ? selectedPlan.planEndDate : ""} />
                             </div>
