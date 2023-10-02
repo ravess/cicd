@@ -163,8 +163,8 @@ function Board()
         try 
         {
             const response = await Axios.get(`/apps/${app_acronym_param}/plans/${planName}`, { withCredentials: true });
-            //console.log(response.data);
-            return (response.data.data);
+            // console.log(response.data);
+            return (response.data);
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Plan." });
