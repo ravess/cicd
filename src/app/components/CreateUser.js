@@ -42,7 +42,7 @@ function CreateUser()
   {
     try
     {
-      const response = await Axios.get("/getGroups", { withCredentials: true });
+      const response = await Axios.get("/users/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e)
     {
@@ -81,7 +81,7 @@ function CreateUser()
         try
         {
           const response = await Axios.post(
-            "/user/new",
+            "/users/new",
             {
               username: data.username ? data.username : "",
               password: data.password ? data.password : "",

@@ -67,7 +67,7 @@ function ModifyUser()
   {
     try
     {
-      const response = await Axios.get("/getGroups", { withCredentials: true });
+      const response = await Axios.get("/users/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e)
     {
@@ -206,8 +206,7 @@ function ModifyUser()
 
 
   useEffect(() =>
-  {
-
+  { 
     const filteredGroups = groupData.filter((group1) =>
       !existingGroupData.some((group2) => group1.groupName === group2.groupName)
     );

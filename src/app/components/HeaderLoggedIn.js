@@ -87,9 +87,9 @@ function HeaderLoggedIn(props)
         </button>
       ) : null}
 
-      {/* <button onClick={handleTMS} className="ml-3 btn btn-md btn-success">
+      <button onClick={handleTMS} className="ml-3 btn btn-md btn-success">
         Task Management System
-      </button> */}
+      </button>
 
       <button onClick={handleProfileManagement} className="ml-3 btn btn-md btn-success">
         Manage Profile
