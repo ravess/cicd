@@ -1,0 +1,219 @@
+{
+	"info": {
+		"_postman_id": "a1965959-c0b3-47d2-b1ac-e2715c73acae",
+		"name": "Specialisation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28228395",
+		"_collection_link": "https://winter-moon-639825.postman.co/workspace/New-Team-Workspace~173b57d6-bed8-4c31-a11d-05df323a7dd9/collection/28228395-a1965959-c0b3-47d2-b1ac-e2715c73acae?action=share&source=collection_link&creator=28228395"
+	},
+	"item": [
+		{
+			"name": "Get All Users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Groups",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/getGroups",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"getGroups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Group",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"groupName\":\"tester\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/createGroup",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"createGroup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create New User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"bob\",\r\n    \"password\": \"temp1233!\",\r\n    \"email\": \"\",\r\n    \"is_active\": 1,\r\n    \"groups\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/newuser",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"newuser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login v2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"bob\",\r\n    \"password\":\"temp1234!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/login2",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User (Admin)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"bob\",\r\n    \"password\": \"temp1234!\",\r\n    \"email\": \"\",\r\n    \"is_active\": 1,\r\n    \"groups\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users/bob",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"bob"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User by Username",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/users/bob",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"bob"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
