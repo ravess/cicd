@@ -43,7 +43,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.get("/getGroups", { withCredentials: true });
+      const response = await Axios.get("/users/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e) 
     {
@@ -55,7 +55,7 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/createGroup", { groupName: newgroup }, { withCredentials: true });
+      const response = await Axios.post("/users/createGroup", { groupName: newgroup }, { withCredentials: true });
       appDispatch({ type: "flashMessage", value: "Group created." });
     } catch (e) 
     {
