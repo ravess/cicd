@@ -717,18 +717,16 @@ function Board()
                 {
                     try
                     {
-                        const response = await Axios.post(
-                            "/modifyApp",
+                        const response = await Axios.put(
+                            `/apps/${app_acronym_param}/edit`,
                             {
-                                app_acronym: appData.app_acronym,
-                                app_start_date: (data.app_start_date ? data.app_start_date : null),
-                                app_end_date: (data.app_end_date ? data.app_end_date : null),
-                                app_permit_open: data.permit_open,
-                                app_permit_todo: data.permit_todo,
-                                app_permit_doing: data.permit_doing,
-                                app_permit_done: data.permit_done,
-                                app_permit_create: data.permit_create,
-                                groups: "ProjectLead"
+                                appStartDate: (data.app_start_date ? data.app_start_date : null),
+                                appEndDate: (data.app_end_date ? data.app_end_date : null),
+                                appPermitOpen: data.permit_open,
+                                appPermitToDoList: data.permit_todo,
+                                appPermitDoing: data.permit_doing,
+                                appPermitDone: data.permit_done,
+                                appPermitCreate: data.permit_create,
                             },
                             { withCredentials: true }
                         );
