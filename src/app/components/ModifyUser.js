@@ -67,7 +67,7 @@ function ModifyUser()
   {
     try
     {
-      const response = await Axios.get("/users/getGroups", { withCredentials: true });
+      const response = await Axios.get("/getGroups", { withCredentials: true });
       setGroupData(response.data.data);
     } catch (e)
     {
