@@ -190,7 +190,7 @@ function Board()
         {
             const response = await Axios.get(`/apps/${app_acronym_param}`, { withCredentials: true });
             // console.log("getApp Response : " + JSON.stringify(response.data));
-            setAppData(response.data.data);
+            setAppData(response.data.data[0]);
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Apps." });
