@@ -450,7 +450,7 @@ function Board()
                                 <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
                             </div>
 
-                            {((task.taskState === "OPEN" && selectedTaskAction !== "Promote") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
+                            {((task.taskState === "OPEN") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
                                 <div className="form-group">
                                     <label className="mb-1">
                                         <b>Assigned to Plan</b>
@@ -917,7 +917,7 @@ function Board()
                         return false;
                     }
                 }
-                CreateApp().then(getApps()).then(navigate(`/board/${data.app_acronym}`)).then(getTasks());
+                CreateApp().then(navigate(`/board/${data.app_acronym}`));
                 window.scrollTo(0, 0);
                 closeModal();
             }
