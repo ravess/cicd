@@ -280,7 +280,7 @@ textarea.tall-textarea {
   margin: 10px 0;
   background-color: #f5f5f5;
   /* Add other styles as needed for your card appearance */
-  height: 100px;
+  height: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

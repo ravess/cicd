@@ -186,7 +186,7 @@ function Board()
         try 
         {
             const response = await Axios.get(`/apps/${app_acronym_param}`, { withCredentials: true });
-            // console.log("getApp Response : " + JSON.stringify(response.data));
+            //console.log("getApp Response : " + JSON.stringify(response.data));
             setAppData(response.data.data[0]);
         } catch (e) 
         {
@@ -210,14 +210,15 @@ function Board()
         try
         {
             const response = await Axios.post("/hasAccess", { appAcronym: appData.appAcronym, appState: sanitisedState }, { withCredentials: true });
-            if (response.data.allowedAccess === false)
+            if (!response.data.allowedAccess || response.data.allowedAccess === false)
             {
-                console.log("AA: " + allowedAccess);
+                console.log("AA: " + response.data.allowedAccess);
                 appDispatch({ type: "flashMessage", value: "You do not have permission to access this resource." });
                 getUser();
                 getApp();
+                return false;
             }
-            console.log("AA: false");
+            console.log("AA: " + response.data.allowedAccess);
             return response.data.allowedAccess;
 
         }
@@ -368,7 +369,7 @@ function Board()
 
             refreshData();
 
-            if (await handleStateAuthorisation(task.task_state) === false)
+            if (await handleStateAuthorisation(task.taskState) === false)
             {
                 window.scrollTo(0, 0);
                 closeModal();
@@ -386,18 +387,18 @@ function Board()
                     {
                         console.log("Starting axios.post selectedTaskAction = " + selectedTaskAction);
                         await getTasks();
-                        const response = await Axios.post(
-                            "/modifyTask",
+                        const response = await Axios.put(
+                            `/apps/${app_acronym_param}/tasks/${task.taskID}/edit`,
                             {
-                                task_id: task.task_id,
-                                task_name: task.task_name,
-                                task_notes_current: task.task_notes,
-                                task_notes_new: data.task_notes_new ? data.task_notes_new : "",
-                                task_plan_current: task.task_plan,
-                                task_plan_new: data.task_plan ? data.task_plan : task.task_plan,
-                                task_state: task.task_state,
-                                task_action: selectedTaskAction,
-                                task_owner: userData.username
+                                taskID: task.taskID,
+                                taskName: task.taskName,
+                                taskNotesCurrent: task.taskNotes,
+                                taskNotesNew: data.task_notes_new ? data.task_notes_new : "",
+                                taskPlanCurrent: task.taskPlan,
+                                taskPlanNew: data.task_plan ? data.task_plan : task.taskPlan,
+                                taskState: task.taskState,
+                                taskAction: selectedTaskAction,
+                                taskOwner: userData.username
                             },
                             { withCredentials: true }
                         );
@@ -430,7 +431,7 @@ function Board()
             <Modal
                 isModalOpen={isModalOpen}
                 closeModal={closeModal}
-                title={`${selectedTaskAction} Task (${task.task_id})`}
+                title={`${selectedTaskAction} Task (${task.taskID})`}
                 content={
                     <>
                         <form id="modalForm" onSubmit={handleSaveChanges}>
@@ -449,7 +450,7 @@ function Board()
                                 <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
                             </div>
 
-                            {((task.task_state === "OPEN" && selectedTaskAction !== "Promote") || task.task_state === "DONE" && selectedTaskAction === "Demote") && (
+                            {((task.taskState === "OPEN" && selectedTaskAction !== "Promote") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
                                 <div className="form-group">
                                     <label className="mb-1">
                                         <b>Assigned to Plan</b>
@@ -466,7 +467,7 @@ function Board()
                                 </div>
                             )}
 
-                            {(task.task_state !== "DONE" || (task.task_state === "DONE" && selectedTaskAction !== "Demote")) && (
+                            {(task.taskState !== "DONE" || (task.taskState === "DONE" && selectedTaskAction !== "Demote")) && (
                                 <div className="form-group">
                                     <label className="mb-1">
                                         <b>Assigned to Plan </b>
@@ -888,7 +889,6 @@ function Board()
                     return true;
                 }
 
-                console.log(JSON.stringify(data));
                 async function CreateApp()
                 {
                     try
@@ -1323,8 +1323,6 @@ function Board()
     //Execute when location changes
     useEffect(() =>
     {
-        console.log("REFRESH DATA");
-        console.log(app_acronym_param);
         refreshData();
     }, [location]);
 
@@ -1406,7 +1404,6 @@ function Board()
                         <h3 className="text-center my-1">{state.charAt(0).toUpperCase() + state.slice(1).replace("State", "")}</h3>
                         {app_acronym_param && (tasks.map((task) => (
                             <div key={task.taskName} className="kanban-card text-center" style={{ borderColor: getPlanColor(task.taskPlan) }}>
-                                <b>({task.taskID})<br /></b>
                                 {task.taskName}<br />
                                 {state.toUpperCase() !== "OPENSTATE" && state.toUpperCase() !== "TODOSTATE" && hasPermissionForState(state) && ( // Check the state here
                                     <button className="btn btn-sm btn-secondary mx-3 mt-2" onClick={async () =>
