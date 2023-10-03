@@ -160,8 +160,8 @@ function Board()
         try 
         {
             const response = await Axios.get(`/apps/${app_acronym_param}/plans/${planName}`, { withCredentials: true });
-            // console.log(response.data);
-            return (response.data);
+            // console.log(response.data.data[0]);
+            return (response.data.data[0]);
         } catch (e) 
         {
             ({ type: "flashMessage", value: "Error getting Plan." });
@@ -1180,8 +1180,8 @@ function Board()
                 {
                     try
                     {
-                        const response = await Axios.post(
-                            `/apps/${app_acronym_param}/plans/${selectedPlan.plan_mvp_name}/edit`,
+                        const response = await Axios.put(
+                            `/apps/${app_acronym_param}/plans/${selectedPlan.planMVPName}/edit`,
                             {
                                 // planMVPName: selectedPlan.plan_mvp_name,
                                 planStartDate: data.plan_start_date,
