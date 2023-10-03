@@ -1184,7 +1184,7 @@ function Board()
                     try
                     {
                         const response = await Axios.post(
-                            `/apps/${app_acronym_param}/plans/${selectedPlan.plan_mvp_name}/edit`,
+                            `/apps/${app_acronym_param}/plans/${selectedPlan.planMVPName}/edit`,
                             {
                                 // planMVPName: selectedPlan.plan_mvp_name,
                                 planStartDate: data.plan_start_date,
