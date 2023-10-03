@@ -98,11 +98,8 @@ function Board()
 
     function getPlanColor(planName)
     {
-        if (planData)
-        {
-            const plan = planData.find((plan) => plan.planMVPName === planName);
-            return plan ? plan.planColor : '#939393'; // Default color if plan is not found
-        }
+        const plan = planData.find((plan) => plan.planMVPName === planName);
+        return plan ? plan.planColor : '#939393'; // Default color if plan is not found
     }
 
     // Function to check if the user has permission for a specific state
@@ -562,14 +559,14 @@ function Board()
                                 taskName: data.task_name ? data.task_name : "",
                                 taskDescription: data.task_description ? data.task_description : "",
                                 taskNotes: data.task_notes ? data.task_notes : "No creation notes entered.",
-                               
+
                                 taskPlan: data.task_plan ? data.task_plan : ""
-                              
+
                             },
                             { withCredentials: true }
                         );
-                        
-                             
+
+
                         appDispatch({ type: "flashMessage", value: "Task successfully created." });
                         return true;
                     } catch (e)
@@ -1217,9 +1214,9 @@ function Board()
                         <form id="modalForm" onSubmit={handleSaveChanges}>
 
                             <div className="dropdown form-group">
-                            <label className="mb-1">
-                                <b>Plan</b>
-                            </label>
+                                <label className="mb-1">
+                                    <b>Plan</b>
+                                </label>
                                 <select className="form-control" name="dropdownMenuButton" onChange={getSelectedPlan}>
                                     <option value="">Select Plan</option>
                                     {planData.map((plan) => (
