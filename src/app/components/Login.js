@@ -85,7 +85,7 @@ function Login()
           />
         </div>
         <button type="submit" className="py-3 mt-4 btn btn-lg btn-success btn-block">
-          Login
+          Logon
         </button>
       </form>
     </Page>
