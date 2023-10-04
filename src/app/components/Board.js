@@ -302,33 +302,15 @@ function Board()
                                     </label>
                                     <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} autoComplete="off" disabled />
                                 </div>
-                                {((task.taskState === "OPEN") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
-                                    <div className="form-group col">
-                                        <label >
-                                            <b>Assigned to Plan</b>
-                                        </label>
-                                        <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.taskPlan}>
-                                            {/* Render the options based on the planData state */}
-                                            <option value="none">None</option>
-                                            {planData.map((plan) => (
-                                                <option key={plan.planMVPName} value={plan.planMVPName}>
-                                                    {plan.planMVPName}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
 
-                                {(task.taskState !== "OPEN") && (task.taskState !== "DONE" || (task.taskState === "DONE" && selectedTaskAction !== "Demote")) && (
-                                    <div className="form-group col">
-                                        <label>
-                                            <b>Assigned to Plan</b>
-                                        </label>
-                                        <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
-                                    </div>
-                                )}
-
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Assigned to Plan</b>
+                                    </label>
+                                    <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
+                                </div>
                             </div>
+
                             <div className="form-group col">
                                 <label>
                                     <b>Task Description</b>
