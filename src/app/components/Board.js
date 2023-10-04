@@ -261,7 +261,7 @@ function Board()
 
                 {/* Modal */}
                 <div className={`modal ${isModalOpen ? 'show' : ''}`} tabIndex="-1" role="dialog" style={{ display: isModalOpen ? 'block' : 'none' }}>
-                    <div className="modal-dialog modal-lg">
+                    <div className="modal-dialog modal-xl">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h3 className="modal-title">{title}</h3>
@@ -295,57 +295,77 @@ function Board()
                     <>
                         <form id="modalForm">
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Name: </b>
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Task Name</b>
+                                    </label>
+                                    <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} autoComplete="off" disabled />
+                                </div>
+                                {((task.taskState === "OPEN") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
+                                    <div className="form-group col">
+                                        <label >
+                                            <b>Assigned to Plan</b>
+                                        </label>
+                                        <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.taskPlan}>
+                                            {/* Render the options based on the planData state */}
+                                            <option value="none">None</option>
+                                            {planData.map((plan) => (
+                                                <option key={plan.planMVPName} value={plan.planMVPName}>
+                                                    {plan.planMVPName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                {(task.taskState !== "OPEN") && (task.taskState !== "DONE" || (task.taskState === "DONE" && selectedTaskAction !== "Demote")) && (
+                                    <div className="form-group col">
+                                        <label>
+                                            <b>Assigned to Plan</b>
+                                        </label>
+                                        <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
+                                    </div>
+                                )}
+
+                            </div>
+                            <div className="form-group col">
+                                <label>
+                                    <b>Task Description</b>
                                 </label>
-                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} disabled />
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="1" disabled />
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Description: </b>
-                                </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="col">
+                                    <label>
+                                        <b>Task Creator:  </b>{task.taskCreator}
+                                    </label>
+                                </div>
+
+                                <div className="col">
+                                    <label>
+                                        <b>Task Owner:  </b>{task.taskOwner}
+                                    </label>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Assigned to Plan </b>
-                                </label>
-                                <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="col">
+                                    <label>
+                                        <b>Created:  </b>{task.taskCreateDate}
+                                    </label>
+                                </div>
+
+                                <div className="col">
+                                    <label>
+                                        <b>State:  </b>{task.taskState}
+                                    </label>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Creator</b>
-                                </label>
-                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.taskCreator} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Owner</b>
-                                </label>
-                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.taskOwner} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Created</b>
-                                </label>
-                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.taskCreateDate} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>State</b>
-                                </label>
-                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.taskState} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
+                            <div className="form-group col">
+                                <label>
                                     <b>Task Notes</b>
                                 </label>
                                 <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.taskNotes ? task.taskNotes : ""} rows="10" disabled />
@@ -436,86 +456,87 @@ function Board()
                     <>
                         <form id="modalForm" onSubmit={handleSaveChanges}>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Name: </b>
-                                </label>
-                                <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Description: </b>
-                                </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="5" disabled />
-                            </div>
-
-                            {((task.taskState === "OPEN") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
-                                <div className="form-group">
-                                    <label className="mb-1">
-                                        <b>Assigned to Plan</b>
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Task Name:  </b>
                                     </label>
-                                    <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.taskPlan}>
-                                        {/* Render the options based on the planData state */}
-                                        <option value="none">None</option>
-                                        {planData.map((plan) => (
-                                            <option key={plan.planMVPName} value={plan.planMVPName}>
-                                                {plan.planMVPName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <input id="task_name" name="task_name" className="form-control" type="text" placeholder={task.taskName} autoComplete="off" disabled />
                                 </div>
-                            )}
+                                {((task.taskState === "OPEN") || task.taskState === "DONE" && selectedTaskAction === "Demote") && (
+                                    <div className="form-group col">
+                                        <label >
+                                            <b>Assigned to Plan</b>
+                                        </label>
+                                        <select className="form-control" id="task_plan" name="task_plan" defaultValue={task.taskPlan}>
+                                            {/* Render the options based on the planData state */}
+                                            <option value="none">None</option>
+                                            {planData.map((plan) => (
+                                                <option key={plan.planMVPName} value={plan.planMVPName}>
+                                                    {plan.planMVPName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
 
-                            {(task.taskState !== "DONE" || (task.taskState === "DONE" && selectedTaskAction !== "Demote")) && (
-                                <div className="form-group">
-                                    <label className="mb-1">
-                                        <b>Assigned to Plan </b>
+                                {(task.taskState !== "OPEN") && (task.taskState !== "DONE" || (task.taskState === "DONE" && selectedTaskAction !== "Demote")) && (
+                                    <div className="form-group col">
+                                        <label>
+                                            <b>Assigned to Plan</b>
+                                        </label>
+                                        <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
+                                    </div>
+                                )}
+
+                            </div>
+                            <div className="form-group col">
+                                <label>
+                                    <b>Task Description</b>
+                                </label>
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="1" disabled />
+                            </div>
+
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="col">
+                                    <label>
+                                        <b>Task Creator:  </b>{task.taskCreator}
                                     </label>
-                                    <input id="task_plan" name="task_plan" className="form-control" type="text" placeholder={task.taskPlan} disabled />
                                 </div>
-                            )}
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Creator</b>
-                                </label>
-                                <input id="task_creator" name="task_creator" className="form-control" type="text" placeholder={task.taskCreator} disabled />
+                                <div className="col">
+                                    <label>
+                                        <b>Task Owner:  </b>{task.taskOwner}
+                                    </label>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Task Owner</b>
-                                </label>
-                                <input id="task_owner" name="task_owner" className="form-control" type="text" placeholder={task.taskOwner} disabled />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="col">
+                                    <label>
+                                        <b>Created:  </b>{task.taskCreateDate}
+                                    </label>
+                                </div>
+
+                                <div className="col">
+                                    <label>
+                                        <b>State:  </b>{task.taskState}
+                                    </label>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Created</b>
-                                </label>
-                                <input id="task_create_date" name="task_create_date" className="form-control" type="text" placeholder={task.taskCreateDate} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>State</b>
-                                </label>
-                                <input id="task_state" name="task_state" className="form-control" type="text" placeholder={task.taskState} disabled />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="mb-1">
+                            <div className="form-group col">
+                                <label>
                                     <b>Task Notes</b>
                                 </label>
-                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.taskNotes ? task.taskNotes : ""} rows="10" disabled />
+                                <textarea id="task_notes_current" name="task_notes_current" className="form-control" type="text" value={task.taskNotes ? task.taskNotes : ""} rows="7" disabled />
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
+                            <div className="form-group mt-2 col">
+                                <label>
                                     <b>Add Note</b>
                                 </label>
-                                <textarea id="task_notes_new" name="task_notes_new" className="form-control" type="text" placeholder="Additional notes go here" rows="4" />
+                                <textarea id="task_notes_new" name="task_notes_new" className="form-control" type="text" placeholder="Additional notes go here" rows="2" />
                             </div>
 
                         </form>
@@ -579,7 +600,8 @@ function Board()
                 }
                 createTask().then(getTasks).then(getApp);
                 window.scrollTo(0, 0);
-                closeModal();
+                refreshData();
+                e.target.reset();
             }
         };
 
@@ -612,7 +634,7 @@ function Board()
                                 </label>
                                 <select className="form-control" id="task_plan" name="task_plan" defaultValue="none">
                                     {/* Render the options based on the planData state */}
-                                    <option value="">None</option>
+                                    <option value="none">None</option>
                                     {planData.map((plan) => (
                                         <option key={plan.planMVPName} value={plan.planMVPName}>
                                             {plan.planMVPName}
@@ -748,99 +770,107 @@ function Board()
                     <>
                         <form id="modalForm" onSubmit={handleSaveChanges}>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Acronym</b>
-                                </label>
-                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.appAcronym} autoComplete="off" disabled />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col-8">
+                                    <label>
+                                        <b>Application Acronym</b>
+                                    </label>
+                                    <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder={appData.appAcronym} disabled />
+                                </div>
+
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application Release Number</b>
+                                    </label>
+                                    <input id="app_rnumber" name="app_rnumber" className="form-control" type="number" min="1" placeholder={appData.appRNumber} disabled />
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
+                            <div className="form-group col">
+                                <label>
                                     <b>Application Description</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} autoComplete="off" rows="4" disabled />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} rows="3" disabled />
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Release Number</b>
-                                </label>
-                                <input id="app_rnumber" name="app_rnumber" className="form-control" type="text" placeholder={appData.appRNumber} autoComplete="off" disabled />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application Start Date</b>
+                                    </label>
+                                    <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appStartDate ? appData.appStartDate : ""} />
+                                </div>
+
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application End Date</b>
+                                    </label>
+                                    <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appEndDate ? appData.appEndDate : ""} />
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Start Date</b>
-                                </label>
-                                <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appStartDate ? appData.appStartDate : ""} />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Open] State</b>
+                                    </label>
+                                    <select name="permit_open" className="form-control" defaultValue={appData.appPermitOpen}>
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Todo] State</b>
+                                    </label>
+                                    <select name="permit_todo" className="form-control" defaultValue={appData.appPermitToDoList}>
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application End Date</b>
-                                </label>
-                                <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" defaultValue={appData.appEndDate ? appData.appEndDate : ""} />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Doing] State</b>
+                                    </label>
+                                    <select name="permit_doing" className="form-control" defaultValue={appData.appPermitDoing}>
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Done] State</b>
+                                    </label>
+                                    <select name="permit_done" className="form-control" defaultValue={appData.appPermitDone}>
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote from [Open] State</b>
-                                </label>
-                                <select name="permit_open" className="form-control" defaultValue={appData.appPermitOpen}>
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Todo] State</b>
-                                </label>
-                                <select name="permit_todo" className="form-control" defaultValue={appData.appPermitToDoList}>
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Doing] State</b>
-                                </label>
-                                <select name="permit_doing" className="form-control" defaultValue={appData.appPermitDoing}>
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Done] State</b>
-                                </label>
-                                <select name="permit_done" className="form-control" defaultValue={appData.appPermitDone}>
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
+                            <div className="form-group col">
+                                <label htmlFor="group-modify">
                                     <b>Permission to create tasks</b>
                                 </label>
                                 <select name="permit_create" className="form-control" defaultValue={appData.appPermitCreate}>
@@ -931,100 +961,108 @@ function Board()
                 content={
                     <>
                         <form id="modalForm" onSubmit={handleSaveChanges}>
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Acronym (mandatory)</b>
-                                </label>
-                                <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder="Enter application acronym" autoComplete="off" />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col-8">
+                                    <label>
+                                        <b>Application Acronym (mandatory)</b>
+                                    </label>
+                                    <input id="app_acronym" name="app_acronym" className="form-control" type="text" placeholder="Enter application acronym" autoComplete="off" />
+                                </div>
+
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application Release Number</b>
+                                    </label>
+                                    <input id="app_rnumber" name="app_rnumber" className="form-control" type="number" min="1" placeholder="Enter application rnumber" autoComplete="off"
+                                        defaultValue="1" />
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
+                            <div className="form-group col">
+                                <label>
                                     <b>Application Description (mandatory)</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder="Enter task description" autoComplete="off" />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder="Enter task description" rows="1" autoComplete="off" />
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Release Number</b>
-                                </label>
-                                <input id="app_rnumber" name="app_rnumber" className="form-control" type="number" min="1" placeholder="Enter application rnumber" autoComplete="off"
-                                    defaultValue="1" />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application Start Date</b>
+                                    </label>
+                                    <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" />
+                                </div>
+
+                                <div className="form-group col">
+                                    <label>
+                                        <b>Application End Date</b>
+                                    </label>
+                                    <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" />
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application Start Date</b>
-                                </label>
-                                <input id="app_start_date" name="app_start_date" className="form-control" type="date" autoComplete="off" />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Open] State</b>
+                                    </label>
+                                    <select name="permit_open" className="form-control">
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Todo] State</b>
+                                    </label>
+                                    <select name="permit_todo" className="form-control">
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label className="mb-1">
-                                    <b>Application End Date</b>
-                                </label>
-                                <input id="app_end_date" name="app_end_date" className="form-control" type="date" autoComplete="off" />
+                            <div className="d-flex flex-row justify-content-between">
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Doing] State</b>
+                                    </label>
+                                    <select name="permit_doing" className="form-control">
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group col">
+                                    <label htmlFor="group-modify">
+                                        <b>Permission to modify tasks in [Done] State</b>
+                                    </label>
+                                    <select name="permit_done" className="form-control">
+                                        <option value="none">None</option>
+                                        {groupData.map((group, index) => (
+                                            <option key={index} value={group.groupName}>
+                                                {group.groupName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote from [Open] State</b>
-                                </label>
-                                <select name="permit_open" className="form-control">
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Todo] State</b>
-                                </label>
-                                <select name="permit_todo" className="form-control">
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Doing] State</b>
-                                </label>
-                                <select name="permit_doing" className="form-control">
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
-                                    <b>Permission to promote/demote from [Done] State</b>
-                                </label>
-                                <select name="permit_done" className="form-control">
-                                    <option value="none">None</option>
-                                    {groupData.map((group, index) => (
-                                        <option key={index} value={group.groupName}>
-                                            {group.groupName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="group-modify" className="mb-1">
+                            <div className="form-group col">
+                                <label htmlFor="group-modify">
                                     <b>Permission to create tasks</b>
                                 </label>
                                 <select name="permit_create" className="form-control">
@@ -1098,8 +1136,7 @@ function Board()
                     }
                 }
                 CreatePlan().then(getPlans);
-                window.scrollTo(0, 0);
-                closeModal();
+                e.target.reset();
             }
         };
 
@@ -1328,7 +1365,12 @@ function Board()
 
     return (
         <Page title="Task Management System" wide={true}>
-            <div className="d-flex justify-content-between">
+
+            <div className="d-flex justify-content-center">
+
+            </div>
+
+            <div className="d-flex flex-column flex-md-row align-items-center justify-content-between">
                 <div className="d-flex justify-content-start">
                     {userData.groups && userData.groups.includes("ProjectLead") && (
                         <div className="flex-row mr-3">
@@ -1405,30 +1447,32 @@ function Board()
                         {app_acronym_param && (tasks.map((task) => (
                             <div key={task.taskName} className="kanban-card text-center" style={{ borderColor: getPlanColor(task.taskPlan) }}>
                                 {task.taskName}<br />
-                                {state.toUpperCase() !== "OPENSTATE" && state.toUpperCase() !== "TODOSTATE" && hasPermissionForState(state) && ( // Check the state here
-                                    <button className="btn btn-sm btn-secondary mx-3 mt-2" onClick={async () =>
-                                    {
-                                        (await handleStateAuthorisation(state)) ? handleEditTask(task, "Demote") : null;
-                                    }}>&lt; &lt;</button>
-                                )}
+                                <div className=" d-flex flex-column flex-sm-row justify-content-center">
+                                    {state.toUpperCase() !== "OPENSTATE" && state.toUpperCase() !== "TODOSTATE" && hasPermissionForState(state) && ( // Check the state here
+                                        <button className="btn btn-sm btn-secondary mr-1 mt-2" onClick={async () =>
+                                        {
+                                            (await handleStateAuthorisation(state)) ? handleEditTask(task, "Demote") : null;
+                                        }}>&lt; &lt;</button>
+                                    )}
 
-                                {hasPermissionForState(state) && (
-                                    <button className="btn btn-sm btn-secondary mt-2" onClick={async () =>
-                                    {
-                                        (await handleStateAuthorisation(state)) ? handleEditTask(task, "Edit") : null;
-                                    }}>Edit</button>
-                                )}
+                                    {hasPermissionForState(state) && (
+                                        <button className="btn btn-sm btn-secondary mt-2" onClick={async () =>
+                                        {
+                                            (await handleStateAuthorisation(state)) ? handleEditTask(task, "Edit") : null;
+                                        }}>Edit</button>
+                                    )}
 
-                                {!hasPermissionForState(state) && (
-                                    <button className="btn btn-sm btn-secondary mt-2" onClick={() => handleEditTask(task, "View")}>View</button>
-                                )}
+                                    {!hasPermissionForState(state) && (
+                                        <button className="btn btn-sm btn-secondary mt-2" onClick={() => handleEditTask(task, "View")}>View</button>
+                                    )}
 
-                                {hasPermissionForState(state) && ( // Check the state here
-                                    <button className="btn btn-sm btn-secondary mx-3 mt-2" onClick={async () =>
-                                    {
-                                        (await handleStateAuthorisation(state)) ? handleEditTask(task, "Promote") : null;
-                                    }}>&gt;&gt;</button>
-                                )}
+                                    {hasPermissionForState(state) && ( // Check the state here
+                                        <button className="btn btn-sm btn-secondary ml-1 mt-2" onClick={async () =>
+                                        {
+                                            (await handleStateAuthorisation(state)) ? handleEditTask(task, "Promote") : null;
+                                        }}>&gt;&gt;</button>
+                                    )}
+                                </div>
                             </div>
                         )))}
 
