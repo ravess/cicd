@@ -21,6 +21,7 @@ function Home()
       {
         const response = await Axios.get("/getUser", { withCredentials: true });
         setUserData(response.data);
+        appDispatch({ type: "updateName", value: response.data.username });
       } catch (e) 
       {
         appDispatch({ type: "flashMessage", value: "You are not authorised to view this page." });

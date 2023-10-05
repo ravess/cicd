@@ -109,6 +109,7 @@ function Board()
         {
             const response = await Axios.get("/getUser", { withCredentials: true });
             setUserData(response.data);
+            appDispatch({ type: "updateName", value: response.data.username });
             // console.log(JSON.stringify(response.data));
         } catch (e)
         {
@@ -518,7 +519,7 @@ function Board()
                                 <label>
                                     <b>Add Note</b>
                                 </label>
-                                <textarea id="task_notes_new" name="task_notes_new" className="form-control" type="text" placeholder="Additional notes go here" rows="2" />
+                                <textarea id="task_notes_new" name="task_notes_new" className="form-control" type="text" placeholder="Additional notes go here" rows="5" />
                             </div>
 
                         </form>

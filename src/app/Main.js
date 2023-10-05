@@ -23,17 +23,21 @@ import ModifyProfile from "./components/ModifyProfile";
 import CreateUser from "./components/CreateUser";
 import Board from "./components/Board";
 
-function Main() {
+function Main()
+{
   const initialState = {
     loggedIn: null,
     flashMessages: [],
     dbChange: 0,
     isAdmin: false,
     isLoading: true,
+    loginName: ""
   };
 
-  function ourReducer(draft, action) {
-    switch (action.type) {
+  function ourReducer(draft, action)
+  {
+    switch (action.type)
+    {
       case "login":
         draft.loggedIn = true;
         return;
@@ -55,29 +59,38 @@ function Main() {
       case "showLoading":
         draft.isLoading = action.value;
         return;
+      case "updateName":
+        draft.loginName = action.value;
     }
   }
 
   const [state, dispatch] = useImmerReducer(ourReducer, initialState);
 
-  useEffect(() => {
-    if (state.loggedIn == false) {
+  useEffect(() =>
+  {
+    if (state.loggedIn == false)
+    {
       Axios.post("/logout", { withCredentials: true });
     }
   }, [state.loggedIn]);
 
-  useEffect(() => {
-    async function cookieCheck() {
-      try {
+  useEffect(() =>
+  {
+    async function cookieCheck()
+    {
+      try
+      {
         const hasCookie = await checkForCookie();
         console.log("Has Cookie = " + hasCookie);
         dispatch({ type: hasCookie ? "login" : "logout" });
-      } catch (error) {
+      } catch (error)
+      {
         dispatch({
           type: "flashMessage",
           value: "Error connecting to backend.",
         });
-      } finally {
+      } finally
+      {
         dispatch({ type: "showLoading", value: false });
       }
     }
@@ -109,6 +122,7 @@ function Main() {
 const root = ReactDOM.createRoot(document.querySelector("#app"));
 root.render(<Main />);
 
-if (module.hot) {
+if (module.hot)
+{
   module.hot.accept();
 }

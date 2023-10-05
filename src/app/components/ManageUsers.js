@@ -63,6 +63,19 @@ function ManageUsers()
     }
   }
 
+  async function getUser()
+  {
+    try
+    {
+      const response = await Axios.get("/getUser", { withCredentials: true });
+      appDispatch({ type: "updateName", value: response.data.username });
+    } catch (e)
+    {
+      appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
+      navigate("/");
+    }
+  }
+
   async function getUsers() 
   {
     try 
@@ -89,6 +102,7 @@ function ManageUsers()
         navigate("/");
       }
     }
+    getUser();
     cookieCheck();
     isAdmin();
     getUsers();

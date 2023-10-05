@@ -96,7 +96,7 @@ function HeaderLoggedIn(props)
       </button>
 
       <button onClick={handleLogout} className="ml-3 btn btn-md btn-success">
-        Sign Out
+        Sign Out [{appState.loginName}]
       </button>
     </div>
   );

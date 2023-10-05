@@ -206,7 +206,7 @@ function ModifyUser()
 
 
   useEffect(() =>
-  { 
+  {
     const filteredGroups = groupData.filter((group1) =>
       !existingGroupData.some((group2) => group1.groupName === group2.groupName)
     );
