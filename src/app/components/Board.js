@@ -315,7 +315,7 @@ function Board()
                                 <label>
                                     <b>Task Description</b>
                                 </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="1" disabled />
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder={task.taskDescription} rows="4" disabled />
                             </div>
 
                             <div className="d-flex flex-row justify-content-between">
@@ -607,7 +607,7 @@ function Board()
                                 <label className="mb-1">
                                     <b>Task Description (mandatory) </b>
                                 </label>
-                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder="Enter brief description" />
+                                <textarea id="task_description" name="task_description" className="form-control" type="text" placeholder="Enter brief description" rows="4" />
                             </div>
 
                             <div className="form-group">
@@ -665,7 +665,7 @@ function Board()
                                 <label className="mb-1">
                                     <b>Application Description</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} autoComplete="off" rows="4" disabled />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} autoComplete="off" rows="6" disabled />
                             </div>
 
                             <div className="form-group">
@@ -772,7 +772,7 @@ function Board()
                                 <label>
                                     <b>Application Description</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} rows="3" disabled />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder={appData.appDescription} rows="5" disabled />
                             </div>
 
                             <div className="d-flex flex-row justify-content-between">
@@ -964,7 +964,7 @@ function Board()
                                 <label>
                                     <b>Application Description (mandatory)</b>
                                 </label>
-                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder="Enter task description" rows="1" autoComplete="off" />
+                                <textarea id="app_description" name="app_description" className="form-control" type="text" placeholder="Enter application description" rows="5" autoComplete="off" />
                             </div>
 
                             <div className="d-flex flex-row justify-content-between">
