@@ -4,7 +4,7 @@ import { useImmerReducer } from "use-immer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { checkForCookie } from "./components/Permissions";
 import Axios from "axios";
-Axios.defaults.baseURL = "http://localhost:8080";
+Axios.defaults.baseURL = process.env.BACKENDURL;
 Axios.defaults.withCredentials = true;
 
 import StateContext from "./StateContext";
@@ -23,21 +23,17 @@ import ModifyProfile from "./components/ModifyProfile";
 import CreateUser from "./components/CreateUser";
 import Board from "./components/Board";
 
-function Main()
-{
+function Main() {
   const initialState = {
     loggedIn: null,
     flashMessages: [],
     dbChange: 0,
     isAdmin: false,
-    isLoading: true
+    isLoading: true,
   };
 
-
-  function ourReducer(draft, action)
-  {
-    switch (action.type)
-    {
+  function ourReducer(draft, action) {
+    switch (action.type) {
       case "login":
         draft.loggedIn = true;
         return;
@@ -59,40 +55,33 @@ function Main()
       case "showLoading":
         draft.isLoading = action.value;
         return;
-
     }
   }
 
   const [state, dispatch] = useImmerReducer(ourReducer, initialState);
 
-  useEffect(() =>
-  {
-    if (state.loggedIn == false)
-    {
+  useEffect(() => {
+    if (state.loggedIn == false) {
       Axios.post("/logout", { withCredentials: true });
     }
   }, [state.loggedIn]);
 
-  useEffect(() =>
-  {
-    async function cookieCheck()
-    {
-      try
-      {
+  useEffect(() => {
+    async function cookieCheck() {
+      try {
         const hasCookie = await checkForCookie();
         console.log("Has Cookie = " + hasCookie);
         dispatch({ type: hasCookie ? "login" : "logout" });
-      } catch (error)
-      {
-        dispatch({ type: "flashMessage", value: "Error connecting to backend." });
-      }
-      finally
-      {
+      } catch (error) {
+        dispatch({
+          type: "flashMessage",
+          value: "Error connecting to backend.",
+        });
+      } finally {
         dispatch({ type: "showLoading", value: false });
       }
     }
     cookieCheck();
-
   }, []);
 
   return (
@@ -120,7 +109,6 @@ function Main()
 const root = ReactDOM.createRoot(document.querySelector("#app"));
 root.render(<Main />);
 
-if (module.hot)
-{
+if (module.hot) {
   module.hot.accept();
 }

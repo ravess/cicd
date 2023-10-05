@@ -10,7 +10,7 @@ module.exports = {
   mode: "development",
   devtool: "source-map",
   devServer: {
-    port: 3000,
+    port: process.env.FRONTENDPORT,
     static: {
       directory: path.join(__dirname, "app")
     },
