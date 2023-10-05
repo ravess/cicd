@@ -6,44 +6,54 @@ import StateContext from "../StateContext";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import { checkForCookie } from "./Permissions";
 
-function Login()
-{
+function Login() {
   const appDispatch = useContext(DispatchContext);
   const appState = useContext(StateContext);
 
   //Login button event handler
-  async function handleSubmit(e)
-  {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     //Get Form Data
     const formData = new FormData(e.target);
     const data = {};
-    for (let [key, value] of formData.entries()) { data[key] = value; }
+    for (let [key, value] of formData.entries()) {
+      data[key] = value;
+    }
 
     //Warn if either fields empty, else send query to backend.
-    if (!data.username || !data.password)
-    { appDispatch({ type: "flashMessage", value: "Please enter a username and password." }); }
-    else
-    {
-      async function fetchResults()
-      {
-        try
-        {
-          const response = await Axios.post("/login", { username: data.username, password: data.password }, { withCredentials: true });
+    if (!data.username || !data.password) {
+      appDispatch({
+        type: "flashMessage",
+        value: "Please enter a username and password.",
+      });
+    } else {
+      async function fetchResults() {
+        try {
+          const response = await Axios.post(
+            "/login",
+            { username: data.username, password: data.password },
+            { withCredentials: true }
+          );
           // console.log(response);
           appDispatch({ type: "login" });
-          appDispatch({ type: "flashMessage", value: "You have successfully logged in." });
+          appDispatch({
+            type: "flashMessage",
+            value: "You have successfully logged in.",
+          });
           appDispatch({ type: "showLoading", value: true });
-        } catch (e)
-        {
-          if (e.response.status === 403)
-          {
-            appDispatch({ type: "flashMessage", value: "Your account has been disabled. Please contact your System Administrator for information." });
-          }
-          else
-          {
-            appDispatch({ type: "flashMessage", value: "Invalid username / password." });
+        } catch (e) {
+          if (e.response.status === 403) {
+            appDispatch({
+              type: "flashMessage",
+              value:
+                "Your account has been disabled. Please contact your System Administrator for information.",
+            });
+          } else {
+            appDispatch({
+              type: "flashMessage",
+              value: "Invalid username / password.",
+            });
           }
         }
       }
@@ -51,8 +61,7 @@ function Login()
     }
   }
 
-  if (appState.isLoading)
-  {
+  if (appState.isLoading) {
     return <LoadingDotsIcon />;
   }
 
@@ -84,8 +93,11 @@ function Login()
             placeholder="Enter password"
           />
         </div>
-        <button type="submit" className="py-3 mt-4 btn btn-lg btn-success btn-block">
-          Login
+        <button
+          type="submit"
+          className="py-3 mt-4 btn btn-lg btn-success btn-block"
+        >
+          Authenticate
         </button>
       </form>
     </Page>
