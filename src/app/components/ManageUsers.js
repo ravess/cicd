@@ -55,11 +55,24 @@ function ManageUsers()
   {
     try 
     {
-      const response = await Axios.post("/createGroup", { groupName: newgroup }, { withCredentials: true });
+      const response = await Axios.post("/users/createGroup", { groupName: newgroup }, { withCredentials: true });
       appDispatch({ type: "flashMessage", value: "Group created." });
     } catch (e) 
     {
       appDispatch({ type: "flashMessage", value: "Group creation failed." });
+    }
+  }
+
+  async function getUser()
+  {
+    try
+    {
+      const response = await Axios.get("/getUser", { withCredentials: true });
+      appDispatch({ type: "updateName", value: response.data.username });
+    } catch (e)
+    {
+      appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });
+      navigate("/");
     }
   }
 
@@ -89,6 +102,7 @@ function ManageUsers()
         navigate("/");
       }
     }
+    getUser();
     cookieCheck();
     isAdmin();
     getUsers();

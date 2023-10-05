@@ -4,7 +4,7 @@ import { useImmerReducer } from "use-immer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { checkForCookie } from "./components/Permissions";
 import Axios from "axios";
-Axios.defaults.baseURL = "http://localhost:8080";
+Axios.defaults.baseURL = process.env.BACKENDURL;
 Axios.defaults.withCredentials = true;
 
 import StateContext from "./StateContext";
@@ -30,9 +30,9 @@ function Main()
     flashMessages: [],
     dbChange: 0,
     isAdmin: false,
-    isLoading: true
+    isLoading: true,
+    loginName: ""
   };
-
 
   function ourReducer(draft, action)
   {
@@ -59,7 +59,8 @@ function Main()
       case "showLoading":
         draft.isLoading = action.value;
         return;
-
+      case "updateName":
+        draft.loginName = action.value;
     }
   }
 
@@ -84,15 +85,16 @@ function Main()
         dispatch({ type: hasCookie ? "login" : "logout" });
       } catch (error)
       {
-        dispatch({ type: "flashMessage", value: "Error connecting to backend." });
-      }
-      finally
+        dispatch({
+          type: "flashMessage",
+          value: "Error connecting to backend.",
+        });
+      } finally
       {
         dispatch({ type: "showLoading", value: false });
       }
     }
     cookieCheck();
-
   }, []);
 
   return (

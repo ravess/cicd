@@ -23,6 +23,7 @@ function ModifyProfile()
       const response = await Axios.get("/getUser", { withCredentials: true });
       setIsLoading(false);
       setUserData(response.data);
+      appDispatch({ type: "updateName", value: response.data.username });
     } catch (e)
     {
       appDispatch({ type: "flashMessage", value: "You do not have the rights to access this page." });

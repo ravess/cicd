@@ -81,7 +81,7 @@ function CreateUser()
         try
         {
           const response = await Axios.post(
-            "/user/new",
+            "/users/new",
             {
               username: data.username ? data.username : "",
               password: data.password ? data.password : "",
