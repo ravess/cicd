@@ -1,9 +1,136 @@
 # .gitlab-ci.yml
 
+# # Start the pipeline if release branch
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^rel_jsb_\d+_\d+$/
+
 stages:
+  - build
+  - publish
+  - deliver
   - test
 
-test:
-  stage: test
+# define Build & Bin server paths
+variables:
+  BUILD_SVR_PATH: "C:\\Users\\commonuser\\Documents\\mss-academy-projects\\specialization\\build_svr"
+  BIN_REPO_SVR_PATH: "C:\\Users\\commonuser\\Documents\\mss-academy-projects\\specialization\\bin_repo_svr"
+
+build:
+  stage: build
   script:
     - echo "Hello, GitLab Runner!"
+
+build:
+  stage: publish
+  script:
+    - echo "Hello, GitLab Runner!"
+
+
+
+
+
+# # define stage sequence 
+# stages:
+#   - prepare
+#   - build
+#   - publish
+#   - deliver
+#   - test
+#   - clear
+
+
+
+
+
+# copy_to_local_folder:
+#   stage: prepare
+  
+#   script:
+#     - Write-Host "Executing copy"
+#     # remove internal release label folder from Bin repo server environment if exist 
+#     - |
+#       if (Test-Path "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME") {
+#         Remove-Item -Path "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME" -Recurse -Force;
+#       }
+#     # remove internal release label folder from Build server environment if exist
+#     - |
+#       if (Test-Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME") {
+#         Remove-Item -Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME" -Recurse -Force;
+#       }
+#     # create internal release label folder in Build server and copy the cloned repository to internal release label folder
+#     - |
+#       New-Item -Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME" -ItemType Directory -Force;
+#       Copy-Item -Path "$env:CI_PROJECT_DIR\*" -Destination "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME" -Recurse;
+
+# build_jar_file:
+#   stage: build
+
+#   script:
+#     # change working directory to Build server folder and run build.ps1
+#     - cd "$BUILD_SVR_PATH\\$env:CI_COMMIT_REF_NAME"
+#     - "& $BUILD_SVR_PATH\\$env:CI_COMMIT_REF_NAME\\build\\build.ps1"
+#     # remove tar ball if it exist in build/<internal release label> folder
+#     - |
+#       if(Test-Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar") {
+#         Remove-Item -Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar" -Force
+#       }
+#     # create a tar ball of the required folders
+#     - tar -cf "$env:CI_COMMIT_REF_NAME.tar" "bin" "deploy" "config" "test"
+ 
+# copy_to_bin_repo:
+#   stage: publish
+#   script:
+#     # remove tar ball if it exist in Bin_repo_svr/<internal release label> folder working dir
+#     - |
+#       if(Test-Path "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar") {
+#         Remove-Item -Path "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar";
+#       }
+#     # create a new folder based on the internal release label in Bin repo server
+#     - New-Item -Path "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME" -ItemType Directory -Force;
+#     # copy tar ball from the Build/<internal release label> folder to Bin_repo_svr/<internal release label> folder
+#     - Copy-Item -Path "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar" -Destination "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar";
+#     # list the content of the tar ball
+#     - tar -tf "$BUILD_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar";
+
+# setup_ssh:
+#   stage: deliver
+#   script:
+#     # secure copy protocol the tar ball from the bin_repo_svr/<internal release label> folder into l1ds group1<internal release label> folder
+#     - scp -v "$BIN_REPO_SVR_PATH\$env:CI_COMMIT_REF_NAME\$env:CI_COMMIT_REF_NAME.tar" "$($env:REMOTE_USER)@$($env:REMOTE_HOST):\C:\Users\l1ds\group1\"
+
+# untar:
+#   stage: deliver
+#   script:
+#     # create a new folder in l1ds based on the internal release label and extract the tar ball into the folder. 
+#     # Run the deploy.ps1
+#     - |
+#       ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" "New-Item -Path 'C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME)' -ItemType Directory -Force;
+#       tar -xvf 'C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME).tar' -C 'C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME)';
+#       powershell -command 'C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME)\deploy\deploy.ps1' -CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME};"
+#   needs:
+#     - setup_ssh
+
+# functional_testing:
+#   stage: test
+#   script:
+#     # delete project lead account group from db and run test.ps1 in l1ds
+#     - |
+#       echo "DELETE FROM tmsappdb.accgroup WHERE groupName='project lead';" | ssh l1ds@192.168.0.2 "mysql -u $($env:L1DS_SQL_USER) -p$($env:L1DS_SQL_PASSWORD)"
+#     - ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME)\test\test.ps1
+
+# clear_docker:
+#   stage: clear
+#   script:
+#     # stop docker container, remove <internal release label> docker container and remove <internal release label> docker image 
+#     - ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" "docker stop $($env:CI_COMMIT_REF_NAME)"
+#     - ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" "docker rm $($env:CI_COMMIT_REF_NAME)"
+#     - ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" "docker rmi $($env:CI_COMMIT_REF_NAME)"
+#   allow_failure: true
+
+# clear_folders:
+#   stage: clear
+#   script:
+#     # delete the l1ds/group1/<internal release label> folder
+#     - ssh "$($env:REMOTE_USER)@$($env:REMOTE_HOST)" "Remove-Item -Path 'C:\Users\l1ds\group1\$($env:CI_COMMIT_REF_NAME)' -Recurse -Force;"
+#   allow_failure: true

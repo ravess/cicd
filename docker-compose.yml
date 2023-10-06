@@ -1,0 +1,28 @@
+version: "3.6"
+
+services:
+  web:
+    image: "gitlab/gitlab-ce:latest"
+    restart: always
+    hostname: "gitlab.local"
+    environment:
+      # GITLAB_OMNIBUS_CONFIG: |
+      #   external_url 'https://gitlab.example.com'
+      #   # Add any other gitlab.rb configuration here, each on its own line
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://192.168.0.5:8083'
+
+    ports:
+      - "8083:8083"
+      - "443:443"
+      - "22:22"
+    volumes:
+      - "gitlab-config:/etc/gitlab"
+      - "gitlab-logs:/var/log/gitlab"
+      - "gitlab-data:/var/opt/gitlab"
+    shm_size: "256m"
+
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
