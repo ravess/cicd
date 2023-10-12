@@ -11,29 +11,29 @@ $properties = Get-Content -Path "C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME\c
     }
 }
 
-# Retrieve the values from the properties
-$databaseName = ($properties | Where-Object { $_.Name -eq 'databaseName' }).Value
-$username = ($properties | Where-Object { $_.Name -eq 'username' }).Value
-$password = ($properties | Where-Object { $_.Name -eq 'password' }).Value
-$sqlFilePath = ($properties | Where-Object { $_.Name -eq 'sqlFilePath' }).Value
+# # Retrieve the values from the properties
+# $databaseName = ($properties | Where-Object { $_.Name -eq 'databaseName' }).Value
+# $username = ($properties | Where-Object { $_.Name -eq 'username' }).Value
+# $password = ($properties | Where-Object { $_.Name -eq 'password' }).Value
+# $sqlFilePath = ($properties | Where-Object { $_.Name -eq 'sqlFilePath' }).Value
 
-try{
-# Read SQL script content
+# try{
+# # Read SQL script content
 
 
 
-# MySQL command to create the database and execute the SQL script.
-$mysqlCommand = "mysql -u $username -p$password -D `"$databaseName`" --execute=`"source $sqlFilePath`""
+# # MySQL command to create the database and execute the SQL script.
+# $mysqlCommand = "mysql -u $username -p$password -D `"$databaseName`" --execute=`"source $sqlFilePath`""
 
-# Start a new process to run the MySQL command and pass SQL script content via standard input
-Invoke-Expression -Command "mysql -u $username -p$password -e 'CREATE SCHEMA $databaseName'"
-Invoke-Expression -Command $mysqlCommand
+# # Start a new process to run the MySQL command and pass SQL script content via standard input
+# Invoke-Expression -Command "mysql -u $username -p$password -e 'CREATE SCHEMA $databaseName'"
+# Invoke-Expression -Command $mysqlCommand
 
-Write-Host "Database created and SQL script executed successfully."
-}
-catch{
-  Write-Host "Error: $_"
-}
+# Write-Host "Database created and SQL script executed successfully."
+# }
+# catch{
+#   Write-Host "Error: $_"
+# }
 
 # Load the Docker image from the tar file
 Write-Host "C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME\bin\$CI_COMMIT_REF_NAME.tar"
