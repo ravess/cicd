@@ -1,0 +1,101 @@
+# .gitlab-ci.yml
+
+# # Start the pipeline if release branch !
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^rel_jsb_\d.*$/
+
+stages:
+  - build
+  - publish
+  - deliver
+  - test
+
+# define Build & Bin server paths !!!!!!
+variables:
+  BUILD_SVR_PATH: "C:\\Users\\common\\Documents\\cicd\\build_svr"
+  BIN_REPO_SVR_PATH: "C:\\Users\\common\\Documents\\cicd\\bin_repo_svr"
+
+copy_gitlab_repo:
+  stage: build #Copying Files from Gitlab Repo to Build Server Folder
+  script:
+    - Write-Host "Copying files from gitlab repo to local"
+    # remove internal release label folder from Bin repo server ronment if exist
+    - |
+      if (Test-Path "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME") {
+        Remove-Item -Path "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME" -Recurse -Force;
+      }
+    # remove internal release label folder from Build server ronment if exist
+    - |
+      if (Test-Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME") {
+        Remove-Item -Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME" -Recurse -Force;
+      }
+    # create internal release label folder in Build server and copy the cloned repository to internal release label folder
+    - |
+      New-Item -Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME" -ItemType Directory -Force;
+      Copy-Item -Path "$CI_PROJECT_DIR\*" -Destination "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME" -Recurse;
+
+Start_build:
+  stage: build #Publish to the bin repo paths
+  script:
+    - Write-Host "Building files in progress..."
+    # change working directory to Build server folder and run build.ps1
+    - cd "$BUILD_SVR_PATH\\$CI_COMMIT_REF_NAME"
+    - "& $BUILD_SVR_PATH\\$CI_COMMIT_REF_NAME\\build\\build.ps1"
+    #     # remove tar ball if it exist in build/<internal release label> folder
+    - |
+      if(Test-Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar") {
+        Remove-Item -Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar" -Force
+      }
+    #     # create a tar ball of the required folders
+    - tar -cf "$CI_COMMIT_REF_NAME.tar" "bin" "deploy" "config" "test"
+  needs:
+    - copy_gitlab_repo
+
+Copy_to_bin_repo:
+  stage: publish
+  script:
+    # remove tar ball if it exist in Bin_repo_svr/<internal release label> folder working dir
+    - |
+      if(Test-Path "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar") {
+        Remove-Item -Path "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar";
+      }
+    # create a new folder based on the internal release label in Bin repo server
+    - New-Item -Path "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME" -ItemType Directory -Force;
+    # copy tar ball from the Build/<internal release label> folder to Bin_repo_svr/<internal release label> folder
+    - Copy-Item -Path "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar" -Destination "$BIN_REPO_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar";
+    # list the content of the tar ball
+    - tar -tf "$BUILD_SVR_PATH\$CI_COMMIT_REF_NAME\$CI_COMMIT_REF_NAME.tar"
+  needs:
+    - Start_build
+
+ssh_into_server:
+  stage: deliver
+  script:
+    - Write-Host "SSH into server testing123!"
+    - whoami
+    # secure copy protocol the tar ball from the bin_repo_svr/<internal release label> folder into l1ds group1<internal release label> folder
+    - scp -v "$BIN_REPO_SVR_PATH\\$CI_COMMIT_REF_NAME\\$CI_COMMIT_REF_NAME.tar" "$($REMOTE_USER)@$($REMOTE_HOST):C:\\Users\\l1ds\\bytebrigade\"
+  needs:
+    - Copy_to_bin_repo
+
+l1ds_server_untar:
+  stage: deliver
+  script:
+    - echo "Yay have untar the file!!"
+    # create a new folder in l1ds based on the internal release label and extract the tar ball into the folder.
+    # Run the deploy.ps1
+    - ssh "$($REMOTE_USER)@$($REMOTE_HOST)" "New-Item -Path 'C:\Users\l1ds\bytebrigade\$($CI_COMMIT_REF_NAME)' -ItemType Directory -Force"
+    - ssh "$($REMOTE_USER)@$($REMOTE_HOST)" "cd 'C:\Users\l1ds\bytebrigade\'; tar -xvf 'C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME.tar' -C 'C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME'; cd 'C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME\deploy'; ls; Set-ExecutionPolicy RemoteSigned; powershell -File deploy.ps1 -CI_COMMIT_REF_NAME '$CI_COMMIT_REF_NAME';"
+
+  needs:
+    - ssh_into_server
+
+
+functional_testing:
+  stage: test
+  script:
+    # delete project lead account group from db and run test.ps1 in l1ds
+    - ssh "$($REMOTE_USER)@$($REMOTE_HOST)" "Start-Sleep -Seconds 20; cd 'C:\Users\l1ds\bytebrigade\$CI_COMMIT_REF_NAME\test'; powershell -File test1.ps1 -CI_COMMIT_REF_NAME '$CI_COMMIT_REF_NAME';"
+  needs:
+    - l1ds_server_untar
