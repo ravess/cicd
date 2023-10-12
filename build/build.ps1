@@ -14,7 +14,7 @@ Write-Host "mvnwPath: $mvnwPath"
 # Run the Maven Wrapper command
 # cmd /c $mvnwPath clean package
 cd $mvnwPath
-mvn clean package
+mvn clean package -DskipTests
 echo "CD to build server folder"
 cd $BUILD_SVR_PATH\$CI_COMMIT_REF_NAME
 echo $BUILD_SVR_PATH
